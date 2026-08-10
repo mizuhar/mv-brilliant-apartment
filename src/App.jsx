@@ -1,16 +1,19 @@
-import Home from "./components/Home"
-
+import Navbar from './components/Navbar';
+import Hero from './components/Hero';
+import About from './components/About';
+import Gallery from './components/Gallery';
+import Amenities from './components/Amenities';
 
 function App() {
-  
-
   return (
-    <>
-    
-<Home />
-    
-    </>
-  )
+      <div className="app">
+        <Navbar />
+        <Hero />
+        <About />
+        <Gallery />
+        <Amenities />
+      </div>
+  );
 }
 
-export default App
+export default App;
