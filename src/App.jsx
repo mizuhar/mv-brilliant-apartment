@@ -3,6 +3,9 @@ import Hero from './components/Hero';
 import About from './components/About';
 import Gallery from './components/Gallery';
 import Amenities from './components/Amenities';
+import Location from './components/Location';
+import Booking from './components/Booking';
+import Footer from './components/Footer';
 
 function App() {
   return (
@@ -12,6 +15,9 @@ function App() {
         <About />
         <Gallery />
         <Amenities />
+        <Location />
+        <Booking />
+        <Footer />
       </div>
   );
 }
