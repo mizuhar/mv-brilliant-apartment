@@ -1,5 +1,7 @@
 import { useState } from 'react';
-import { Calendar, Users, Mail, Phone, User, Send, CheckCircle } from 'lucide-react';
+import { Calendar, Users, Mail, Phone, User, Send, CheckCircle, Loader2 } from 'lucide-react';
+import { db } from '../firebase.js';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import styles from './Booking.module.css';
 
 export default function Booking() {
@@ -13,17 +15,31 @@ export default function Booking() {
     message: '',
   });
 
+  const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState('');
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Тук по-нататък ще вържем изпращането към Firebase / EmailJS
-    console.log('Booking request sent:', formData);
-    setSubmitted(true);
+    setLoading(true);
+    setError('');
+
+    try {
+      await addDoc(collection(db, 'bookings'), {
+        ...formData,
+        createdAt: serverTimestamp(),
+      });
+      setSubmitted(true);
+    } catch (err) {
+      console.error('Error adding document: ', err);
+      setError('Възникна грешка при изпращането. Моля, опитайте отново.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -40,11 +56,11 @@ export default function Booking() {
             <p>Предпочитате бърз разговор или съобщение? Свържете се с нас директно:</p>
 
             <div className={styles['contact-list']}>
-              <a href="tel:+359899990291" className={styles['contact-item']}>
+              <a href="tel:+359888000000" className={styles['contact-item']}>
                 <div className={styles.icon}><Phone size={20} /></div>
                 <div>
                   <span>Телефон</span>
-                  <strong>+359 899990291</strong>
+                  <strong>+359 88 800 0000</strong>
                 </div>
               </a>
 
@@ -52,7 +68,7 @@ export default function Booking() {
                 <div className={styles.icon}><Mail size={20} /></div>
                 <div>
                   <span>Имейл</span>
-                  <strong>mizuhar@abv.bg</strong>
+                  <strong>info@mvbrilliant.com</strong>
                 </div>
               </a>
             </div>
@@ -74,6 +90,8 @@ export default function Booking() {
               </div>
             ) : (
               <form onSubmit={handleSubmit} className={styles['booking-form']}>
+                {error && <div style={{ color: '#dc2626', fontSize: '0.9rem' }}>{error}</div>}
+
                 <div className={styles['form-group']}>
                   <label htmlFor="name"><User size={16} /> Вашето име</label>
                   <input
@@ -169,9 +187,18 @@ export default function Booking() {
                   ></textarea>
                 </div>
 
-                <button type="submit" className={styles['btn-submit']}>
-                  <Send size={18} />
-                  <span>Изпрати запитването</span>
+                <button type="submit" className={styles['btn-submit']} disabled={loading}>
+                  {loading ? (
+                    <>
+                      <Loader2 size={18} className="animate-spin" />
+                      <span>Изпращане...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Send size={18} />
+                      <span>Изпрати запитването</span>
+                    </>
+                  )}
                 </button>
               </form>
             )}
