@@ -22,25 +22,62 @@ export default function Booking() {
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
+  const sendTelegramNotification = async (data) => {
+  const botToken = import.meta.env.VITE_TELEGRAM_BOT_TOKEN;
+  const chatId = import.meta.env.VITE_TELEGRAM_CHAT_ID;
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
+  if (!botToken || !chatId) return;
 
-    try {
-      await addDoc(collection(db, 'bookings'), {
-        ...formData,
-        createdAt: serverTimestamp(),
-      });
-      setSubmitted(true);
-    } catch (err) {
-      console.error('Error adding document: ', err);
-      setError('Възникна грешка при изпращането. Моля, опитайте отново.');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const message = `
+🔔 *НОВА РЕЗЕРВАЦИЯ / ЗАПИТВАНЕ*
+
+👤 *Име:* ${data.name}
+📞 *Телефон:* ${data.phone}
+📧 *Имейл:* ${data.email}
+📅 *Настаняване:* ${data.checkIn}
+📅 *Напускане:* ${data.checkOut}
+👥 *Гости:* ${data.guests}
+💬 *Забележка:* ${data.message || 'Няма'}
+  `;
+
+  try {
+    await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chat_id: chatId,
+        text: message,
+        parse_mode: 'Markdown',
+      }),
+    });
+  } catch (err) {
+    console.error('Грешка при изпращане на Telegram нотификация:', err);
+  }
+};
+
+ const handleSubmit = async (e) => {
+  e.preventDefault();
+  setLoading(true);
+  setError('');
+
+  try {
+    // 1. Записваме в базата данни
+    await addDoc(collection(db, 'bookings'), {
+      ...formData,
+      createdAt: serverTimestamp(),
+    });
+
+    // 2. Пращаме съобщение в Telegram
+    await sendTelegramNotification(formData);
+
+    setSubmitted(true);
+  } catch (err) {
+    console.error('Error adding document: ', err);
+    setError('Възникна грешка при изпращането. Моля, опитайте отново.');
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <section id="booking" className={styles['booking-section']}>
