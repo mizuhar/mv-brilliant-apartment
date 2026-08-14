@@ -1,0 +1,142 @@
+/* Calendar.module.css */
+.calendarWrapper {
+  display: flex;
+  justify-content: center;
+  margin-top: 1.5rem;
+}
+
+/* Общ контейнер за календара */
+:global(.react-calendar) {
+  width: 100% !important;
+  max-width: 450px;
+  background-color: #ffffff !important;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 1.25rem !important;
+  padding: 1.25rem;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05) !important;
+  font-family: inherit !important;
+}
+
+/* Заглавие с месеца и стрелките */
+:global(.react-calendar__navigation) {
+  display: flex;
+  height: 44px;
+  margin-bottom: 1em;
+}
+
+:global(.react-calendar__navigation button) {
+  min-width: 44px;
+  background: none;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1f2937;
+  border-radius: 0.5rem;
+}
+
+:global(.react-calendar__navigation button:enabled:hover) {
+  background-color: #f3f4f6;
+}
+
+/* Дни от седмицата (Пн, Вт...) */
+:global(.react-calendar__month-view__weekdays) {
+  text-align: center;
+  text-transform: uppercase;
+  font-weight: 600;
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin-bottom: 0.5rem;
+}
+
+:global(.react-calendar__month-view__weekdays__weekday abbr) {
+  text-decoration: none;
+}
+
+/* Самите квадратчета за датите */
+/* Стандартни свободни дати - чисти с лек зелен ховър ефект */
+:global(.react-calendar__tile) {
+  max-width: 100%;
+  padding: 12px 6px !important;
+  background: #f0fdf4 !important; /* Лек, светъл зелен фон */
+  color: #166534 !important; /* Тъмнозелен текст за контраст */
+  text-align: center;
+  font-size: 0.95rem;
+  font-weight: 500;
+  border-radius: 0.5rem !important;
+  transition: all 0.2s ease;
+}
+
+:global(.react-calendar__tile:enabled:hover) {
+  background-color: #dcfce7 !important; /* По-наситено зелено при посочване */
+  color: #15803d !important;
+}
+
+/* Днешният ден */
+:global(.react-calendar__tile--now) {
+  background: #f3f4f6 !important;
+  color: #111827 !important;
+  font-weight: 700;
+}
+
+/* Избраният ден */
+:global(.react-calendar__tile--active) {
+  background: #2563eb !important;
+  color: #ffffff !important;
+  font-weight: 600;
+}
+
+/* Блокирани / Заети дати */
+:global(.react-calendar__tile:disabled) {
+  background-color: #fee2e2 !important;
+  color: #ef4444 !important;
+  opacity: 0.8;
+  cursor: not-allowed !important;
+  text-decoration: line-through;
+}
+/* Центриране на секцията, заглавието и подзаглавието */
+.sectionContainer {
+  padding: 3rem 1rem;
+  text-align: center;
+}
+
+.heading {
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 0.5rem;
+}
+
+.subheading {
+  color: #4b5563;
+  margin-bottom: 1.5rem;
+}
+
+/* Центриране на легендата под календара */
+.legend {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+  font-size: 0.875rem;
+  color: #374151;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.dotFree {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: #10b981;
+}
+
+.dotBooked {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: #ef4444;
+}
