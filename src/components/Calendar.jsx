@@ -1,67 +1,60 @@
 import React, { useState, useEffect } from "react";
 import Calendar from "react-calendar";
 import styles from "./Calendar.module.css";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, doc, getDoc } from "firebase/firestore";
 import { db } from "../firebase.js";
+import { syncBookingCalendar } from "../services/syncBooking.js";
 
 const AvailabilityCalendar = () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [bookedDates, setBookedDates] = useState(new Set());
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchBookings = async () => {
-      try {
-        const querySnapshot = await getDocs(collection(db, "bookings"));
-        const datesSet = new Set();
+ useEffect(() => {
+  const syncAndFetchBookings = async () => {
+    try {
+      // 1. Синхронизираме с Booking
+      await syncBookingCalendar();
 
-        querySnapshot.forEach((doc) => {
-          const data = doc.data();
-          if (data.checkIn && data.checkOut) {
-            // Преобразуване на Firestore Timestamp / String към Date обект
-            let start = data.checkIn?.toDate ? data.checkIn.toDate() : new Date(data.checkIn);
-            let end = data.checkOut?.toDate ? data.checkOut.toDate() : new Date(data.checkOut);
+      const datesSet = new Set();
 
-            // Нормализираме часовете
-            start.setHours(0, 0, 0, 0);
-            end.setHours(0, 0, 0, 0);
+      // 2. Взимаме САМО актуалните блокирани дати от iCal
+      const calendarDocRef = doc(db, "calendar", "blocked_dates");
+      const calendarDocSnap = await getDoc(calendarDocRef);
 
-            // Добавяме нощувките (без самия ден на checkOut)
-            let current = new Date(start);
-            while (current < end) {
-              datesSet.add(current.toDateString());
-              current.setDate(current.getDate() + 1);
-            }
-          }
-        });
-
-        setBookedDates(datesSet);
-      } catch (err) {
-        console.error("Грешка при зареждане на заетостта:", err);
-      } finally {
-        setLoading(false);
+      if (calendarDocSnap.exists()) {
+        const data = calendarDocSnap.data();
+        if (data.dates && Array.isArray(data.dates)) {
+          data.dates.forEach((dateStr) => {
+            const [year, month, day] = dateStr.split("-").map(Number);
+            const localDate = new Date(year, month - 1, day);
+            datesSet.add(localDate.toDateString());
+          });
+        }
       }
-    };
 
-    fetchBookings();
-  }, []);
+      setBookedDates(datesSet);
+    } catch (err) {
+      console.error("Грешка при зареждане на заетостта:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  // Проверка дали даден ден е зает или отминал
+  syncAndFetchBookings();
+}, []);
+
   const isTileDisabled = ({ date, view }) => {
     if (view === "month") {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
 
-      // Блокираме минали дати
       if (date < today) return true;
-
-      // Блокираме резервирани дати
       return bookedDates.has(date.toDateString());
     }
     return false;
   };
 
-  // Персонализиран стил за заетите дати
   const tileClassName = ({ date, view }) => {
     if (view === "month" && bookedDates.has(date.toDateString())) {
       return "bg-red-500 text-white rounded-full cursor-not-allowed";
@@ -91,7 +84,6 @@ const AvailabilityCalendar = () => {
           </div>
         )}
 
-        {/* Легенда */}
         <div className={styles.legend}>
           <div className={styles.legendItem}>
             <span className={styles.dotFree}></span>
