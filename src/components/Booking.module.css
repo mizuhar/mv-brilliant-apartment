@@ -209,7 +209,80 @@
   font-weight: 600;
   cursor: pointer;
 }
+/* Тарифи */
+.rate-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
 
+.rate-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.rate-card:hover {
+  border-color: #3b82f6;
+  background-color: #f8fafc;
+}
+
+.rate-card input[type="radio"] {
+  margin-top: 0.25rem;
+}
+
+.rate-card p {
+  font-size: 0.8rem;
+  color: #64748b;
+  margin-top: 0.15rem;
+}
+
+/* Обобщение на цената */
+.price-summary {
+  background-color: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 8px;
+  padding: 1rem;
+  margin: 1rem 0;
+}
+
+.price-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+  color: #166534;
+}
+
+.price-discount {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.85rem;
+  color: #15803d;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.price-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 1.15rem;
+  border-top: 1px dashed #86efac;
+  padding-top: 0.5rem;
+  color: #14532d;
+}
+.btn-submit:disabled {
+  background-color: #94a3b8;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
 /* Responsive */
 @media (max-width: 768px) {
   .booking-section {
