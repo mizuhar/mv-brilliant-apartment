@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Calendar from "react-calendar";
 import styles from "./Calendar.module.css";
-import { collection, getDocs, doc, getDoc } from "firebase/firestore";
+import { doc, getDoc } from "firebase/firestore";
 import { db } from "../firebase.js";
 import { syncBookingCalendar } from "../services/syncBooking.js";
 
@@ -10,39 +10,41 @@ const AvailabilityCalendar = () => {
   const [bookedDates, setBookedDates] = useState(new Set());
   const [loading, setLoading] = useState(true);
 
- useEffect(() => {
-  const syncAndFetchBookings = async () => {
-    try {
-      // 1. Синхронизираме с Booking
-      await syncBookingCalendar();
+  useEffect(() => {
+    const fetchBookings = async () => {
+      try {
+        const calendarDocRef = doc(db, "calendar", "blocked_dates");
+        let calendarDocSnap = await getDoc(calendarDocRef);
 
-      const datesSet = new Set();
-
-      // 2. Взимаме САМО актуалните блокирани дати от iCal
-      const calendarDocRef = doc(db, "calendar", "blocked_dates");
-      const calendarDocSnap = await getDoc(calendarDocRef);
-
-      if (calendarDocSnap.exists()) {
-        const data = calendarDocSnap.data();
-        if (data.dates && Array.isArray(data.dates)) {
-          data.dates.forEach((dateStr) => {
-            const [year, month, day] = dateStr.split("-").map(Number);
-            const localDate = new Date(year, month - 1, day);
-            datesSet.add(localDate.toDateString());
-          });
+        // Ако още няма запис във Firestore, правим първоначална синхронизация
+        if (!calendarDocSnap.exists()) {
+          await syncBookingCalendar();
+          calendarDocSnap = await getDoc(calendarDocRef);
         }
+
+        const datesSet = new Set();
+
+        if (calendarDocSnap.exists()) {
+          const data = calendarDocSnap.data();
+          if (data.dates && Array.isArray(data.dates)) {
+            data.dates.forEach((dateStr) => {
+              const [year, month, day] = dateStr.split("-").map(Number);
+              const localDate = new Date(year, month - 1, day);
+              datesSet.add(localDate.toDateString());
+            });
+          }
+        }
+
+        setBookedDates(datesSet);
+      } catch (err) {
+        console.error("Грешка при зареждане на заетостта:", err);
+      } finally {
+        setLoading(false);
       }
+    };
 
-      setBookedDates(datesSet);
-    } catch (err) {
-      console.error("Грешка при зареждане на заетостта:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  syncAndFetchBookings();
-}, []);
+    fetchBookings();
+  }, []);
 
   const isTileDisabled = ({ date, view }) => {
     if (view === "month") {

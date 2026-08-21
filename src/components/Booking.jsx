@@ -120,7 +120,7 @@ export default function Booking() {
 🌙 *Нощувки:* ${calc ? calc.nights : "N/A"}
 👥 *Гости:* ${data.guests}
 📋 *Тарифа:* ${rateName}
-💶 *Очаквана сума:* ${calc ? `${calc.totalPrice} лв.` : "Не е изчислена"}
+💶 *Очаквана сума:* ${calc ? `${calc.totalPrice} €` : "Не е изчислена"}
 💬 *Забележка:* ${data.message || "Няма"}
     `;
 
@@ -429,7 +429,7 @@ export default function Booking() {
                     )}
                     <div className={styles["price-total"]}>
                       <span>Обща сума:</span>
-                      <strong>{priceCalculation.totalPrice} лв.</strong>
+                      <strong>{priceCalculation.totalPrice} €</strong>
                     </div>
                   </div>
                 )}
