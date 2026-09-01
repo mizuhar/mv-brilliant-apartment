@@ -4,47 +4,48 @@ import styles from "./Gallery.module.css";
 export default function Gallery() {
   const [selectedCategory, setSelectedCategory] = useState("all");
 
-  const processNumbers = (nummbers) => {
-  return nummbers.filter((num) => num % 2 === 0).map((num) => num * 2);
-};
-console.log(processNumbers([1, 2, 3, 4, 5, 6]))
-
   const photos = [
     {
       id: 1,
       category: "living-room",
       title: "Всекидневна",
-      url: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=1200&auto=format&fit=crop",
+      alt: "Просторна всекидневна с мека мебел в MV Brilliant Apartment Варна Чаталджа",
+      url: "/images/chataldja-apartment-living-room.jpg",
     },
     {
       id: 2,
       category: "bedroom",
       title: "Основна спалня",
-      url: "https://images.unsplash.com/photo-1616594039964-ae9021a400a0?q=80&w=1200&auto=format&fit=crop",
+      alt: "Уютна спалня с двойно легло в апартамент под наем Варна",
+      url: "/images/mv-brilliant-bedroom.jpg",
     },
     {
       id: 3,
       category: "kitchen",
       title: "Кухненски бокс",
-      url: "https://images.unsplash.com/photo-1556911220-e15b29be8c8f?q=80&w=1200&auto=format&fit=crop",
+      alt: "Модерно оборудвана кухня с уреди в MV Brilliant Apartment",
+      url: "/images/mv-brilliant-kitchen6.jpg",
     },
     {
       id: 4,
       category: "bathroom",
       title: "Баня и тоалетна",
-      url: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?q=80&w=1200&auto=format&fit=crop",
+      alt: "Чиста и модерна баня в апартамент за нощувки Варна",
+      url: "/images/mv-brilliant-bathroom5.jpg",
     },
     {
       id: 5,
       category: "living-room",
       title: "Зона за релакс",
-      url: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?q=80&w=1200&auto=format&fit=crop",
+      alt: "Кът за почивка с телевизор в MV Brilliant Apartment Чаталджа",
+      url: "/images/mv-brilliant-livingroom2.jpg",
     },
     {
       id: 6,
       category: "balcony",
-      title: "Балкон",
-      url: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=1200&auto=format&fit=crop",
+      title: "Антре",
+      alt: "Слънчева тераса на апартамент под наем район Чаталджа Варна",
+      url: "/images/mv-brilliant-corridor.jpg",
     },
   ];
 
@@ -91,7 +92,7 @@ console.log(processNumbers([1, 2, 3, 4, 5, 6]))
         <div className={styles["gallery-grid"]}>
           {filteredPhotos.map((photo) => (
             <div key={photo.id} className={styles["gallery-card"]}>
-              <img src={photo.url} alt={photo.title} loading="lazy" />
+              <img src={photo.url} alt={photo.alt} loading="lazy" />
               <div className={styles.overlay}>
                 <span>{photo.title}</span>
               </div>

@@ -10,28 +10,33 @@ const AvailabilityCalendar = () => {
   const [bookedDates, setBookedDates] = useState(new Set());
   const [loading, setLoading] = useState(true);
 
+  // Хелпър функция за форматиране на дата в YYYY-MM-DD без проблеми с часовите зони
+  const formatDateToYYYYMMDD = (date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
   useEffect(() => {
     const fetchBookings = async () => {
       try {
-        const calendarDocRef = doc(db, "calendar", "blocked_dates");
-        let calendarDocSnap = await getDoc(calendarDocRef);
+        setLoading(true);
 
-        // Ако още няма запис във Firestore, правим първоначална синхронизация
-        if (!calendarDocSnap.exists()) {
-          await syncBookingCalendar();
-          calendarDocSnap = await getDoc(calendarDocRef);
-        }
+        // 1. Синхронизираме с Booking
+        await syncBookingCalendar();
+
+        // 2. Вземаме обновените дати от Firestore
+        const calendarDocRef = doc(db, "calendar", "blocked_dates");
+        const calendarDocSnap = await getDoc(calendarDocRef);
 
         const datesSet = new Set();
 
         if (calendarDocSnap.exists()) {
           const data = calendarDocSnap.data();
           if (data.dates && Array.isArray(data.dates)) {
-            data.dates.forEach((dateStr) => {
-              const [year, month, day] = dateStr.split("-").map(Number);
-              const localDate = new Date(year, month - 1, day);
-              datesSet.add(localDate.toDateString());
-            });
+            // Записваме ги директно като "YYYY-MM-DD"
+            data.dates.forEach((dateStr) => datesSet.add(dateStr));
           }
         }
 
@@ -52,14 +57,19 @@ const AvailabilityCalendar = () => {
       today.setHours(0, 0, 0, 0);
 
       if (date < today) return true;
-      return bookedDates.has(date.toDateString());
+
+      const dateStr = formatDateToYYYYMMDD(date);
+      return bookedDates.has(dateStr);
     }
     return false;
   };
 
   const tileClassName = ({ date, view }) => {
-    if (view === "month" && bookedDates.has(date.toDateString())) {
-      return "bg-red-500 text-white rounded-full cursor-not-allowed";
+    if (view === "month") {
+      const dateStr = formatDateToYYYYMMDD(date);
+      if (bookedDates.has(dateStr)) {
+        return "bg-red-500 text-white rounded-full cursor-not-allowed";
+      }
     }
     return null;
   };
@@ -73,7 +83,7 @@ const AvailabilityCalendar = () => {
         </p>
 
         {loading ? (
-          <div className="text-gray-500">Зареждане на датите...</div>
+          <div className="text-gray-500 text-center py-8">Зареждане и синхронизиране на датите...</div>
         ) : (
           <div className={styles.calendarWrapper}>
             <Calendar

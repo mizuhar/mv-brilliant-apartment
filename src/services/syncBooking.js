@@ -45,38 +45,42 @@ export async function syncBookingCalendar() {
       const startMatch = eventContent.match(/DTSTART(?:;VALUE=DATE)?:?(\d{8})/);
       const endMatch = eventContent.match(/DTEND(?:;VALUE=DATE)?:?(\d{8})/);
 
-      if (startMatch && endMatch) {
-        const startStr = startMatch[1];
-        const endStr = endMatch[1];
+     if (startMatch && endMatch) {
+  const startStr = startMatch[1]; // "20260901"
+  const endStr = endMatch[1];     // "20260902"
 
-        console.log(`Намерено събитие: "${summary}" от ${startStr} до ${endStr}`);
+  // Превръщаме ги в чисти години, месеци и дни без часови зони
+  let year = parseInt(startStr.substring(0, 4));
+  let month = parseInt(startStr.substring(4, 6)) - 1;
+  let day = parseInt(startStr.substring(6, 8));
 
-        let current = new Date(
-          parseInt(startStr.substring(0, 4)),
-          parseInt(startStr.substring(4, 6)) - 1,
-          parseInt(startStr.substring(6, 8))
-        );
+  let current = new Date(Date.UTC(year, month, day));
 
-        const lastDay = new Date(
-          parseInt(endStr.substring(0, 4)),
-          parseInt(endStr.substring(4, 6)) - 1,
-          parseInt(endStr.substring(6, 8))
-        );
+  let endYear = parseInt(endStr.substring(0, 4));
+  let endMonth = parseInt(endStr.substring(4, 6)) - 1;
+  let endDay = parseInt(endStr.substring(6, 8));
 
-        while (current < lastDay) {
-          const year = current.getFullYear();
-          const month = String(current.getMonth() + 1).padStart(2, '0');
-          const day = String(current.getDate()).padStart(2, '0');
+  let lastDay = new Date(Date.UTC(endYear, endMonth, endDay));
 
-          const formattedDate = `${year}-${month}-${day}`;
+  // Ако началната и крайната дата съвпадат (ръчен единичен блок), обработваме поне 1 ден
+  if (current.getTime() === lastDay.getTime()) {
+    lastDay.setDate(lastDay.getDate() + 1);
+  }
 
-          if (!blockedDates.includes(formattedDate)) {
-            blockedDates.push(formattedDate);
-          }
+  while (current < lastDay) {
+    const y = current.getUTCFullYear();
+    const m = String(current.getUTCMonth() + 1).padStart(2, '0');
+    const d = String(current.getUTCDate()).padStart(2, '0');
 
-          current.setDate(current.getDate() + 1);
-        }
-      }
+    const formattedDate = `${y}-${m}-${d}`;
+
+    if (!blockedDates.includes(formattedDate)) {
+      blockedDates.push(formattedDate);
+    }
+
+    current.setUTCDate(current.getUTCDate() + 1);
+  }
+}
     }
 
     console.log('--- ОБЩО БЛОКИРАНИ ДНИ:', blockedDates.length, '---');
