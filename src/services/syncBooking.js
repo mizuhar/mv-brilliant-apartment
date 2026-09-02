@@ -1,4 +1,4 @@
-import { doc, setDoc } from 'firebase/firestore';
+import { doc,getDoc, setDoc,updateDoc } from 'firebase/firestore';
 import { db } from '../firebase.js';
 
 export async function syncBookingCalendar() {
@@ -83,12 +83,21 @@ export async function syncBookingCalendar() {
 }
     }
 
-    console.log('--- ОБЩО БЛОКИРАНИ ДНИ:', blockedDates.length, '---');
+   console.log('--- ОБЩО БЛОКИРАНИ ДНИ ОТ BOOKING:', blockedDates.length, '---');
 
-    // Запазваме в Firestore (използваме обикновен запис, за да презаписваме старите грешни дати)
     const calendarRef = doc(db, 'calendar', 'blocked_dates');
+    const calendarSnap = await getDoc(calendarRef);
+    
+    // Запазваме съществуващите manualDates, ако има такива
+    let existingManualDates = [];
+    if (calendarSnap.exists() && calendarSnap.data().manualDates) {
+      existingManualDates = calendarSnap.data().manualDates;
+    }
+
+    // Запазваме във Firestore без да губим ръчните дати
     await setDoc(calendarRef, {
       dates: blockedDates,
+      manualDates: existingManualDates,
       lastSynced: new Date().toISOString()
     });
 
@@ -97,5 +106,28 @@ export async function syncBookingCalendar() {
   } catch (error) {
     console.error('iCal Sync Error:', error);
     return { success: false, error: error.message };
+  }
+}
+export async function toggleManualBlockDate(dateStr) {
+  const calendarRef = doc(db, 'calendar', 'blocked_dates');
+  const calendarSnap = await getDoc(calendarRef);
+
+  if (calendarSnap.exists()) {
+    const currentManualDates = calendarSnap.data().manualDates || [];
+    let updatedDates;
+
+    if (currentManualDates.includes(dateStr)) {
+      // Премахване от ръчно блокираните
+      updatedDates = currentManualDates.filter((d) => d !== dateStr);
+    } else {
+      // Добавяне към ръчно блокираните
+      updatedDates = [...currentManualDates, dateStr];
+    }
+
+    await updateDoc(calendarRef, {
+      manualDates: updatedDates
+    });
+
+    return updatedDates;
   }
 }

@@ -10,7 +10,7 @@ const AvailabilityCalendar = () => {
   const [bookedDates, setBookedDates] = useState(new Set());
   const [loading, setLoading] = useState(true);
 
-  // Хелпър функция за форматиране на дата в YYYY-MM-DD без проблеми с часовите зони
+  // Хелпър функция за форматиране на дата в YYYY-MM-DD
   const formatDateToYYYYMMDD = (date) => {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -34,9 +34,15 @@ const AvailabilityCalendar = () => {
 
         if (calendarDocSnap.exists()) {
           const data = calendarDocSnap.data();
+
+          // 1. Автоматични от Booking
           if (data.dates && Array.isArray(data.dates)) {
-            // Записваме ги директно като "YYYY-MM-DD"
             data.dates.forEach((dateStr) => datesSet.add(dateStr));
+          }
+
+          // 2. Ръчно блокирани дати
+          if (data.manualDates && Array.isArray(data.manualDates)) {
+            data.manualDates.forEach((dateStr) => datesSet.add(dateStr));
           }
         }
 
@@ -64,11 +70,12 @@ const AvailabilityCalendar = () => {
     return false;
   };
 
+  // За клиентите: Всички блокирани дати се оцветяват като закрити/заети
   const tileClassName = ({ date, view }) => {
     if (view === "month") {
       const dateStr = formatDateToYYYYMMDD(date);
       if (bookedDates.has(dateStr)) {
-        return "bg-red-500 text-white rounded-full cursor-not-allowed";
+        return "booking-blocked"; // Или класът, който ползваш за червено
       }
     }
     return null;
@@ -83,7 +90,9 @@ const AvailabilityCalendar = () => {
         </p>
 
         {loading ? (
-          <div className="text-gray-500 text-center py-8">Зареждане и синхронизиране на датите...</div>
+          <div className="text-gray-500 text-center py-8">
+            Зареждане и синхронизиране на датите...
+          </div>
         ) : (
           <div className={styles.calendarWrapper}>
             <Calendar

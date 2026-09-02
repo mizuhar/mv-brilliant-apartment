@@ -127,7 +127,7 @@ export default function AdminPricing() {
                 onChange={handleChange}
                 required
               />
-              <span>лв.</span>
+              <span>евро.</span>
             </div>
           </div>
 

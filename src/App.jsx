@@ -11,6 +11,7 @@ import Location from "./components/Location";
 import Calendar from "./components/Calendar";
 import Booking from "./components/Booking";
 import AdminPricing from "./components/AdminPricing";
+import AdminCalendar from "./components/AdminCalendar";
 import AdminLogin from "./components/AdminLogin";
 import Footer from "./components/Footer";
 
@@ -130,6 +131,7 @@ function App() {
         </div>
 
         <AdminPricing />
+        <AdminCalendar/>
       </div>
     );
   }

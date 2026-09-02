@@ -1,0 +1,134 @@
+/* AdminCalendar.module.css */
+
+.calendarWrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  margin: 1rem 0;
+}
+
+/* Изграждане на мрежата и контейнера на календара */
+.calendarWrapper :global(.react-calendar) {
+  width: 100% !important;
+  max-width: 420px !important;
+  background-color: #ece6e6 !important;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 1rem !important;
+  padding: 1rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05) !important;
+  font-family: inherit !important;
+}
+
+/* Навигация (месец и бутони) */
+.calendarWrapper :global(.react-calendar__navigation) {
+  display: flex !important;
+  height: 40px !important;
+  margin-bottom: 0.75rem !important;
+}
+
+.calendarWrapper :global(.react-calendar__navigation button) {
+  min-width: 36px !important;
+  background: none !important;
+  border: none !important;
+  font-size: 1rem !important;
+  font-weight: 600 !important;
+  color: #1f2937 !important;
+  border-radius: 0.375rem !important;
+  cursor: pointer !important;
+}
+
+.calendarWrapper :global(.react-calendar__navigation button:enabled:hover) {
+  background-color: #9eb2d9 !important;
+}
+
+/* Дни от седмицата (ПН, ВТ, СР...) */
+.calendarWrapper :global(.react-calendar__month-view__weekdays) {
+  display: flex !important;
+  text-align: center !important;
+  text-transform: uppercase !important;
+  font-weight: 600 !important;
+  font-size: 0.75rem !important;
+  color: #6b7280 !important;
+  margin-bottom: 0.5rem !important;
+}
+
+.calendarWrapper :global(.react-calendar__month-view__weekdays__weekday) {
+  flex: 1 !important;
+  padding: 0.25rem 0 !important;
+}
+
+.calendarWrapper :global(.react-calendar__month-view__weekdays__weekday abbr) {
+  text-decoration: none !important;
+}
+
+/* Редове и дни от месеца (Мрежа/Grid) */
+.calendarWrapper :global(.react-calendar__month-view__days) {
+  display: flex !important;
+  flex-wrap: wrap !important;
+}
+
+/* Самите клетки (плочки) за датите */
+.calendarWrapper :global(.react-calendar__tile) {
+  max-width: 100% !important;
+  height: 40px !important;
+  padding: 0 !important;
+  margin: 2px 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: transparent !important; /* Прозрачен фон */
+  color: #1f2937 !important;
+  font-size: 0.9rem !important;
+  font-weight: 600 !important;
+  border-radius: 8px !important;
+  border: none !important;
+  transition: all 0.15s ease !important;
+}
+
+.calendarWrapper :global(.react-calendar__tile abbr) {
+  text-decoration: none !important;
+  background: transparent !important;
+}
+
+.calendarWrapper :global(.react-calendar__tile:enabled:hover) {
+  background-color: #95afde !important;
+}
+
+/* Дни от съседни месеци (избледнели) */
+.calendarWrapper :global(.react-calendar__month-view__days__day--neighboringMonth) {
+  color: #d1d5db !important;
+}
+
+/* 1. РЪЧНО БЛОКИРАНИ ДАТИ -> СИВО */
+.calendarWrapper :global(.manual-blocked) {
+  background-color: #4b5563 !important; /* Тъмно сиво */
+  color: #ffffff !important;
+  border-radius: 0.5rem !important;
+  font-weight: 700 !important;
+}
+
+.calendarWrapper :global(.manual-blocked abbr) {
+  text-decoration: line-through !important;
+}
+
+/* 2. BOOKING.COM ДАТИ -> ЧЕРВЕНО */
+.calendarWrapper :global(.booking-blocked) {
+  background-color: #ef4444 !important; /* Наситено червено */
+  color: #ffffff !important;
+  border-radius: 0.5rem !important;
+  font-weight: 700 !important;
+  opacity: 0.9 !important;
+  cursor: not-allowed !important;
+}
+
+.calendarWrapper :global(.booking-blocked abbr) {
+  text-decoration: line-through !important;
+}
+
+/* Избрана дата */
+.calendarWrapper :global(.react-calendar__tile--active) {
+  background-color: #2563eb !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+}

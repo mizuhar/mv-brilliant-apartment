@@ -1,14 +1,19 @@
 /* Calendar.module.css */
+
+/* Центриране и ограничаване на ширината на контейнера */
 .calendarWrapper {
   display: flex;
   justify-content: center;
+  align-items: center;
+  width: 100%;
   margin-top: 1.5rem;
 }
 
-/* Общ контейнер за календара */
-:global(.react-calendar) {
+/* Фиксиране на самия календар, за да не се разтяга на целия екран */
+.calendarWrapper :global(.react-calendar) {
   width: 100% !important;
-  max-width: 450px;
+  max-width: 420px !important;
+  margin: 0 auto !important;
   background-color: #ffffff !important;
   border: 1px solid #e5e7eb !important;
   border-radius: 1.25rem !important;
@@ -17,14 +22,14 @@
   font-family: inherit !important;
 }
 
-/* Заглавие с месеца и стрелките */
-:global(.react-calendar__navigation) {
+/* Навигация (месец и стрелки) */
+.calendarWrapper :global(.react-calendar__navigation) {
   display: flex;
   height: 44px;
   margin-bottom: 1em;
 }
 
-:global(.react-calendar__navigation button) {
+.calendarWrapper :global(.react-calendar__navigation button) {
   min-width: 44px;
   background: none;
   font-size: 1.1rem;
@@ -33,12 +38,12 @@
   border-radius: 0.5rem;
 }
 
-:global(.react-calendar__navigation button:enabled:hover) {
+.calendarWrapper :global(.react-calendar__navigation button:enabled:hover) {
   background-color: #f3f4f6;
 }
 
-/* Дни от седмицата (Пн, Вт...) */
-:global(.react-calendar__month-view__weekdays) {
+/* Дни от седмицата (ПН, ВТ...) */
+.calendarWrapper :global(.react-calendar__month-view__weekdays) {
   text-align: center;
   text-transform: uppercase;
   font-weight: 600;
@@ -47,52 +52,70 @@
   margin-bottom: 0.5rem;
 }
 
-:global(.react-calendar__month-view__weekdays__weekday abbr) {
+.calendarWrapper :global(.react-calendar__month-view__weekdays__weekday abbr) {
   text-decoration: none;
 }
 
-/* Самите квадратчета за датите */
-/* Стандартни свободни дати - чисти с лек зелен ховър ефект */
-:global(.react-calendar__tile) {
-  max-width: 100%;
-  padding: 12px 6px !important;
-  background: #f0fdf4 !important; /* Лек, светъл зелен фон */
-  color: #166534 !important; /* Тъмнозелен текст за контраст */
-  text-align: center;
-  font-size: 0.95rem;
-  font-weight: 500;
-  border-radius: 0.5rem !important;
-  transition: all 0.2s ease;
+/* Изчистване на вътрешния abbr таг */
+.calendarWrapper :global(.react-calendar__tile abbr) {
+  text-decoration: none !important;
+  background: transparent !important;
+  border-radius: 0 !important;
+  display: block !important;
+  width: 100% !important;
 }
 
-:global(.react-calendar__tile:enabled:hover) {
-  background-color: #dcfce7 !important; /* По-наситено зелено при посочване */
+/* Квадратчета за датите */
+.calendarWrapper :global(.react-calendar__tile) {
+  max-width: 100% !important;
+  height: 40px !important;
+  padding: 0 !important;
+  margin: 2px 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background-color: #f0fdf4 !important; /* Светлозелен фон за свободни */
+  color: #166534 !important;
+  font-size: 0.9rem !important;
+  font-weight: 600 !important;
+  border-radius: 8px !important;
+  border: none !important;
+  transition: all 0.15s ease !important;
+}
+
+.calendarWrapper :global(.react-calendar__tile:enabled:hover) {
+  background-color: #dcfce7 !important;
   color: #15803d !important;
 }
 
 /* Днешният ден */
-:global(.react-calendar__tile--now) {
-  background: #f3f4f6 !important;
-  color: #111827 !important;
-  font-weight: 700;
+.calendarWrapper :global(.react-calendar__tile--now) {
+  border: 2px solid #9ca3af !important;
+  font-weight: 700 !important;
 }
 
 /* Избраният ден */
-:global(.react-calendar__tile--active) {
-  background: #2563eb !important;
+.calendarWrapper :global(.react-calendar__tile--active) {
+  background-color: #2563eb !important;
   color: #ffffff !important;
-  font-weight: 600;
 }
 
-/* Блокирани / Заети дати */
-:global(.react-calendar__tile:disabled) {
-  background-color: #fee2e2 !important;
-  color: #ef4444 !important;
-  opacity: 0.8;
+/* Блокирани / Заети дати (Booking.com + Ръчно блокирани) */
+.calendarWrapper :global(.booking-blocked),
+.calendarWrapper :global(.react-calendar__tile:disabled) {
+  background-color: #fee2e2 !important; /* Светлочервен фон */
+  color: #dc2626 !important; /* Червен цвят за цифрите */
+  opacity: 0.9 !important;
   cursor: not-allowed !important;
-  text-decoration: line-through;
+  border-radius: 8px !important;
 }
-/* Центриране на секцията, заглавието и подзаглавието */
+
+.calendarWrapper :global(.booking-blocked abbr),
+.calendarWrapper :global(.react-calendar__tile:disabled abbr) {
+  text-decoration: line-through !important;
+}
+
+/* Секция и подзаглавия */
 .sectionContainer {
   padding: 3rem 1rem;
   text-align: center;
@@ -110,7 +133,7 @@
   margin-bottom: 1.5rem;
 }
 
-/* Центриране на легендата под календара */
+/* Легенда под календара */
 .legend {
   display: flex;
   justify-content: center;
