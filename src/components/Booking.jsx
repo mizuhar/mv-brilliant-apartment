@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   Calendar,
   Users,
@@ -12,7 +12,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { db } from "../firebase.js";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { collection, addDoc, serverTimestamp, doc, getDoc } from "firebase/firestore";
 import styles from "./Booking.module.css";
 
 export default function Booking() {
@@ -31,21 +31,47 @@ export default function Booking() {
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
 
-  // ⚙️ Настройки за ценообразуване (могат да се дърпат и от Firestore)
-  const PRICING_CONFIG = {
-    basePrice: 100, // Базова цена за до 2-ма души
-    extraGuestPercent: 0.15, // +15% за всеки човек над 2-рия
-    nonRefundableDiscount: 0.1, // 10% отстъпка за невъзвръщаема тарифа
-    weeklyDiscount: 0.1, // 10% за 7+ нощувки
-    monthlyDiscount: 0.25, // 25% за 28+ нощувки
-    minNights: 2, // Минимален престой
-  };
+  // ⚙️ Динамичен state за ценообразуването от Firestore
+  const [pricingConfig, setPricingConfig] = useState({
+    basePrice: 100,
+    extraGuestPercent: 0.15,
+    nonRefundableDiscount: 0.1,
+    weeklyDiscount: 0.1,
+    monthlyDiscount: 0.25,
+    minNights: 2,
+  });
+
+  // 📥 Дърпане на цените от Firestore при зареждане
+  useEffect(() => {
+    const fetchPricing = async () => {
+      try {
+        const pricingDocRef = doc(db, "settings", "pricing");
+        const pricingSnap = await getDoc(pricingDocRef);
+
+        if (pricingSnap.exists()) {
+          const data = pricingSnap.data();
+          setPricingConfig({
+            basePrice: Number(data.basePrice) || 100,
+            extraGuestPercent: Number(data.extraGuestPercent) ?? 0.15,
+            nonRefundableDiscount: Number(data.nonRefundableDiscount) ?? 0.1,
+            weeklyDiscount: Number(data.weeklyDiscount) ?? 0.1,
+            monthlyDiscount: Number(data.monthlyDiscount) ?? 0.25,
+            minNights: Number(data.minNights) || 2,
+          });
+        }
+      } catch (err) {
+        console.error("Грешка при зареждане на ценовата конфигурация:", err);
+      }
+    };
+
+    fetchPricing();
+  }, []);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // 📊 Калкулатор за цената (изписва се автоматично при промяна на дати, гости или тарифа)
+  // 📊 Динамичен калкулатор за цената
   const priceCalculation = useMemo(() => {
     if (!formData.checkIn || !formData.checkOut) return null;
 
@@ -56,21 +82,21 @@ export default function Booking() {
 
     if (nights <= 0)
       return { error: "Датата на напускане трябва да е след настаняването." };
-    if (nights < PRICING_CONFIG.minNights) {
+    if (nights < pricingConfig.minNights) {
       return {
-        error: `Минималният престой е ${PRICING_CONFIG.minNights} нощувки.`,
+        error: `Минималният престой е ${pricingConfig.minNights} нощувки.`,
       };
     }
 
     const guestsCount = Number(formData.guests);
-    let nightPrice = PRICING_CONFIG.basePrice;
+    let nightPrice = pricingConfig.basePrice;
 
     // Доплащане за допълнителни гости (над 2-ма)
     if (guestsCount > 2) {
       const extraGuests = guestsCount - 2;
       nightPrice +=
-        PRICING_CONFIG.basePrice *
-        (extraGuests * PRICING_CONFIG.extraGuestPercent);
+        pricingConfig.basePrice *
+        (extraGuests * pricingConfig.extraGuestPercent);
     }
 
     let total = nightPrice * nights;
@@ -78,16 +104,16 @@ export default function Booking() {
 
     // Отстъпка за продължителност
     if (nights >= 28) {
-      total *= 1 - PRICING_CONFIG.monthlyDiscount;
-      appliedDiscount = "Месечна отстъпка (-25%)";
+      total *= 1 - pricingConfig.monthlyDiscount;
+      appliedDiscount = `Месечна отстъпка (-${Math.round(pricingConfig.monthlyDiscount * 100)}%)`;
     } else if (nights >= 7) {
-      total *= 1 - PRICING_CONFIG.weeklyDiscount;
-      appliedDiscount = "Седмична отстъпка (-10%)";
+      total *= 1 - pricingConfig.weeklyDiscount;
+      appliedDiscount = `Седмична отстъпка (-${Math.round(pricingConfig.weeklyDiscount * 100)}%)`;
     }
 
     // Отстъпка за невъзвръщаема тарифа
     if (formData.rateType === "nonRefundable") {
-      total *= 1 - PRICING_CONFIG.nonRefundableDiscount;
+      total *= 1 - pricingConfig.nonRefundableDiscount;
     }
 
     return {
@@ -96,7 +122,13 @@ export default function Booking() {
       totalPrice: Math.round(total),
       appliedDiscount,
     };
-  }, [formData.checkIn, formData.checkOut, formData.guests, formData.rateType]);
+  }, [
+    formData.checkIn,
+    formData.checkOut,
+    formData.guests,
+    formData.rateType,
+    pricingConfig,
+  ]);
 
   const sendTelegramNotification = async (data, calc) => {
     const botToken = import.meta.env.VITE_TELEGRAM_BOT_TOKEN;
@@ -106,7 +138,7 @@ export default function Booking() {
 
     const rateName =
       data.rateType === "nonRefundable"
-        ? "🔒 Без право на анулация (-10%)"
+        ? `🔒 Без право на анулация (-${Math.round(pricingConfig.nonRefundableDiscount * 100)}%)`
         : "🟢 Стандартна (С право на анулация)";
 
     const message = `
@@ -346,7 +378,7 @@ export default function Booking() {
                     ⚠️ <strong>{priceCalculation.error}</strong>
                   </div>
                 )}
-                {/* ℹ️ Инфо съобщение за минимален престой */}
+
                 <div
                   style={{
                     fontSize: "0.85rem",
@@ -356,7 +388,7 @@ export default function Booking() {
                   }}
                 >
                   ℹ️ *Минималният престой за резервация е{" "}
-                  {PRICING_CONFIG.minNights} нощувки.*
+                  {pricingConfig.minNights} нощувки.*
                 </div>
 
                 <div className={styles["form-group"]}>
@@ -371,13 +403,18 @@ export default function Booking() {
                   >
                     <option value="1">1 гост</option>
                     <option value="2">2 гости</option>
-                    <option value="3">3 гости (+15%)</option>
-                    <option value="4">4 гости (+30%)</option>
-                    <option value="5">5 гости (+45%)</option>
+                    <option value="3">
+                      3 гости (+{Math.round(pricingConfig.extraGuestPercent * 100)}%)
+                    </option>
+                    <option value="4">
+                      4 гости (+{Math.round(pricingConfig.extraGuestPercent * 2 * 100)}%)
+                    </option>
+                    <option value="5">
+                      5 гости (+{Math.round(pricingConfig.extraGuestPercent * 3 * 100)}%)
+                    </option>
                   </select>
                 </div>
 
-                {/* 🏷️ Избор на тарифа */}
                 <div className={styles["form-group"]}>
                   <label>
                     <ShieldCheck size={16} /> Изберете тарифа
@@ -406,16 +443,20 @@ export default function Booking() {
                         onChange={handleChange}
                       />
                       <div>
-                        <strong>Без право на анулация (-10%)</strong>
+                        <strong>
+                          Без право на анулация (-
+                          {Math.round(pricingConfig.nonRefundableDiscount * 100)}%)
+                        </strong>
                         <p>
-                          Спестявате 10% от сумата, без право на възстановяване
+                          Спестявате{" "}
+                          {Math.round(pricingConfig.nonRefundableDiscount * 100)}%
+                          от сумата, без право на възстановяване
                         </p>
                       </div>
                     </label>
                   </div>
                 </div>
 
-                {/* 💶 Блок за изчислената цена */}
                 {priceCalculation && !priceCalculation.error && (
                   <div className={styles["price-summary"]}>
                     <div className={styles["price-row"]}>
