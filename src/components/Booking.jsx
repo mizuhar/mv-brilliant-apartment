@@ -12,7 +12,13 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { db } from "../firebase.js";
-import { collection, addDoc, serverTimestamp, doc, getDoc } from "firebase/firestore";
+import {
+  collection,
+  addDoc,
+  serverTimestamp,
+  doc,
+  getDoc,
+} from "firebase/firestore";
 import styles from "./Booking.module.css";
 
 export default function Booking() {
@@ -31,17 +37,20 @@ export default function Booking() {
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
 
-  // ⚙️ Динамичен state за ценообразуването от Firestore
+  // ⚙️ Динамичен state за ценообразуването и сезоните от Firestore
   const [pricingConfig, setPricingConfig] = useState({
     basePrice: 100,
     extraGuestPercent: 0.15,
     nonRefundableDiscount: 0.1,
     weeklyDiscount: 0.1,
     monthlyDiscount: 0.25,
+    lastMinuteDiscount: 0.1, // 👈 Добавено
+    earlyBirdDiscount: 0.1,  // 👈 Добавено
     minNights: 2,
+    seasons: [],
   });
 
-  // 📥 Дърпане на цените от Firestore при зареждане
+  // 📥 Дърпане на цените и сезоните от Firestore при зареждане
   useEffect(() => {
     const fetchPricing = async () => {
       try {
@@ -56,7 +65,10 @@ export default function Booking() {
             nonRefundableDiscount: Number(data.nonRefundableDiscount) ?? 0.1,
             weeklyDiscount: Number(data.weeklyDiscount) ?? 0.1,
             monthlyDiscount: Number(data.monthlyDiscount) ?? 0.25,
+            lastMinuteDiscount: Number(data.lastMinuteDiscount) ?? 0.1, // 👈 Прочитаме от DB с fallback 10%
+            earlyBirdDiscount: Number(data.earlyBirdDiscount) ?? 0.1,   // 👈 Прочитаме от DB с fallback 10%
             minNights: Number(data.minNights) || 2,
+            seasons: Array.isArray(data.seasons) ? data.seasons : [],
           });
         }
       } catch (err) {
@@ -71,56 +83,134 @@ export default function Booking() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // 📊 Динамичен калкулатор за цената
+  // 📊 Защитено useMemo с гарантирани fallbacks за Last-Minute & Early-Bird
   const priceCalculation = useMemo(() => {
     if (!formData.checkIn || !formData.checkOut) return null;
 
     const start = new Date(formData.checkIn);
     const end = new Date(formData.checkOut);
-    const diffTime = end - start;
+
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) return null;
+
+    const diffTime = end.getTime() - start.getTime();
     const nights = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-    if (nights <= 0)
+    if (nights <= 0) {
       return { error: "Датата на напускане трябва да е след настаняването." };
-    if (nights < pricingConfig.minNights) {
+    }
+
+    const basePrice = Number(pricingConfig?.basePrice) || 100;
+    const extraGuestPercent = Number(pricingConfig?.extraGuestPercent) ?? 0.15;
+    let maxMinNightsRequired = Number(pricingConfig?.minNights) || 2;
+
+    const guestsCount = Number(formData.guests) || 2;
+    const extraGuests = guestsCount > 2 ? guestsCount - 2 : 0;
+
+    const formatDateLocal = (d) => {
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    };
+
+    let rawTotal = 0;
+    const currentDate = new Date(start.getTime());
+    const seasonsList = Array.isArray(pricingConfig?.seasons) ? pricingConfig.seasons : [];
+
+    // 1. Обхождане ден по ден
+    for (let i = 0; i < nights; i++) {
+      const dateString = formatDateLocal(currentDate);
+
+      const activeSeason = seasonsList.find((season) => {
+        return season?.startDate && season?.endDate && dateString >= season.startDate && dateString <= season.endDate;
+      });
+
+      const dayBasePrice = activeSeason && !isNaN(Number(activeSeason.price))
+        ? Number(activeSeason.price)
+        : basePrice;
+
+      if (activeSeason && !isNaN(Number(activeSeason.minNights)) && Number(activeSeason.minNights) > maxMinNightsRequired) {
+        maxMinNightsRequired = Number(activeSeason.minNights);
+      }
+
+      const dayPrice = dayBasePrice + dayBasePrice * (extraGuests * extraGuestPercent);
+      rawTotal += dayPrice;
+
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+
+    if (nights < maxMinNightsRequired) {
       return {
-        error: `Минималният престой е ${pricingConfig.minNights} нощувки.`,
+        error: `Минималният престой за избрания период е ${maxMinNightsRequired} нощувки.`,
       };
     }
 
-    const guestsCount = Number(formData.guests);
-    let nightPrice = pricingConfig.basePrice;
+    let total = rawTotal;
+    const discountsList = [];
 
-    // Доплащане за допълнителни гости (над 2-ма)
-    if (guestsCount > 2) {
-      const extraGuests = guestsCount - 2;
-      nightPrice +=
-        pricingConfig.basePrice *
-        (extraGuests * pricingConfig.extraGuestPercent);
+    // 2. Отстъпки за престой
+    const monthlyDisc = Number(pricingConfig?.monthlyDiscount) ?? 0.25;
+    const weeklyDisc = Number(pricingConfig?.weeklyDiscount) ?? 0.10;
+
+    if (nights >= 28 && monthlyDisc > 0) {
+      total *= 1 - monthlyDisc;
+      discountsList.push({
+        label: "Месечна отстъпка",
+        percent: Math.round(monthlyDisc * 100),
+      });
+    } else if (nights >= 7 && weeklyDisc > 0) {
+      total *= 1 - weeklyDisc;
+      discountsList.push({
+        label: "Седмична отстъпка",
+        percent: Math.round(weeklyDisc * 100),
+      });
     }
 
-    let total = nightPrice * nights;
-    let appliedDiscount = "";
+    // 3. Last-Minute / Early-Bird (с твърд fallback 0.10, ако липсва в DB)
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
-    // Отстъпка за продължителност
-    if (nights >= 28) {
-      total *= 1 - pricingConfig.monthlyDiscount;
-      appliedDiscount = `Месечна отстъпка (-${Math.round(pricingConfig.monthlyDiscount * 100)}%)`;
-    } else if (nights >= 7) {
-      total *= 1 - pricingConfig.weeklyDiscount;
-      appliedDiscount = `Седмична отстъпка (-${Math.round(pricingConfig.weeklyDiscount * 100)}%)`;
+    const daysUntilCheckIn = Math.ceil((start.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+
+    const lastMinuteDisc = pricingConfig?.lastMinuteDiscount !== undefined
+      ? Number(pricingConfig.lastMinuteDiscount)
+      : 0.1;
+
+    const earlyBirdDisc = pricingConfig?.earlyBirdDiscount !== undefined
+      ? Number(pricingConfig.earlyBirdDiscount)
+      : 0.1;
+
+    if (daysUntilCheckIn >= 0 && daysUntilCheckIn <= 3 && lastMinuteDisc > 0) {
+      total *= 1 - lastMinuteDisc;
+      discountsList.push({
+        label: "Last-Minute оферта",
+        percent: Math.round(lastMinuteDisc * 100),
+      });
+    } else if (daysUntilCheckIn >= 60 && earlyBirdDisc > 0) {
+      total *= 1 - earlyBirdDisc;
+      discountsList.push({
+        label: "Early-Bird (Ранно запитване)",
+        percent: Math.round(earlyBirdDisc * 100),
+      });
     }
 
-    // Отстъпка за невъзвръщаема тарифа
-    if (formData.rateType === "nonRefundable") {
-      total *= 1 - pricingConfig.nonRefundableDiscount;
+    // 4. Невъзвръщаема тарифа
+    const nonRefundableDisc = Number(pricingConfig?.nonRefundableDiscount) ?? 0.1;
+
+    if (formData.rateType === "nonRefundable" && nonRefundableDisc > 0) {
+      total *= 1 - nonRefundableDisc;
+      discountsList.push({
+        label: "Невъзвръщаема тарифа",
+        percent: Math.round(nonRefundableDisc * 100),
+      });
     }
 
     return {
       nights,
-      nightPrice: Math.round(nightPrice),
+      rawTotal: Math.round(rawTotal),
       totalPrice: Math.round(total),
-      appliedDiscount,
+      discountsList,
+      minNightsRequired: maxMinNightsRequired,
     };
   }, [
     formData.checkIn,
@@ -189,10 +279,7 @@ export default function Booking() {
         createdAt: serverTimestamp(),
       };
 
-      // 1. Запис във Firestore
       await addDoc(collection(db, "bookings"), bookingPayload);
-
-      // 2. Известие в Telegram
       await sendTelegramNotification(formData, priceCalculation);
 
       setSubmitted(true);
@@ -224,13 +311,13 @@ export default function Booking() {
             </p>
 
             <div className={styles["contact-list"]}>
-              <a href="tel:+359888000000" className={styles["contact-item"]}>
+              <a href="tel:+359899990291" className={styles["contact-item"]}>
                 <div className={styles.icon}>
                   <Phone size={20} />
                 </div>
                 <div>
                   <span>Телефон</span>
-                  <strong>+359 88 800 0000</strong>
+                  <strong>+359 89 999 0291</strong>
                 </div>
               </a>
 
@@ -243,7 +330,7 @@ export default function Booking() {
                 </div>
                 <div>
                   <span>Имейл</span>
-                  <strong>info@mvbrilliant.com</strong>
+                  <strong>mizuharer2@gmail.com</strong>
                 </div>
               </a>
             </div>
@@ -360,6 +447,7 @@ export default function Booking() {
                     />
                   </div>
                 </div>
+
                 {priceCalculation?.error && (
                   <div
                     style={{
@@ -388,7 +476,9 @@ export default function Booking() {
                   }}
                 >
                   ℹ️ *Минималният престой за резервация е{" "}
-                  {pricingConfig.minNights} нощувки.*
+                  {priceCalculation?.minNightsRequired ||
+                    pricingConfig.minNights}{" "}
+                  нощувки.*
                 </div>
 
                 <div className={styles["form-group"]}>
@@ -404,13 +494,16 @@ export default function Booking() {
                     <option value="1">1 гост</option>
                     <option value="2">2 гости</option>
                     <option value="3">
-                      3 гости (+{Math.round(pricingConfig.extraGuestPercent * 100)}%)
+                      3 гости (+
+                      {Math.round(pricingConfig.extraGuestPercent * 100)}%)
                     </option>
                     <option value="4">
-                      4 гости (+{Math.round(pricingConfig.extraGuestPercent * 2 * 100)}%)
+                      4 гости (+
+                      {Math.round(pricingConfig.extraGuestPercent * 2 * 100)}%)
                     </option>
                     <option value="5">
-                      5 гости (+{Math.round(pricingConfig.extraGuestPercent * 3 * 100)}%)
+                      5 гости (+
+                      {Math.round(pricingConfig.extraGuestPercent * 3 * 100)}%)
                     </option>
                   </select>
                 </div>
@@ -445,29 +538,62 @@ export default function Booking() {
                       <div>
                         <strong>
                           Без право на анулация (-
-                          {Math.round(pricingConfig.nonRefundableDiscount * 100)}%)
+                          {Math.round(
+                            pricingConfig.nonRefundableDiscount * 100
+                          )}
+                          %)
                         </strong>
                         <p>
                           Спестявате{" "}
-                          {Math.round(pricingConfig.nonRefundableDiscount * 100)}%
-                          от сумата, без право на възстановяване
+                          {Math.round(
+                            pricingConfig.nonRefundableDiscount * 100
+                          )}
+                          % от сумата, без право на възстановяване
                         </p>
                       </div>
                     </label>
                   </div>
                 </div>
 
+                {/* 💶 Подробен блок за цената и отстъпките в UI */}
                 {priceCalculation && !priceCalculation.error && (
                   <div className={styles["price-summary"]}>
                     <div className={styles["price-row"]}>
                       <span>Престой:</span>
                       <strong>{priceCalculation.nights} нощувки</strong>
                     </div>
-                    {priceCalculation.appliedDiscount && (
-                      <div className={styles["price-discount"]}>
-                        <Tag size={14} /> {priceCalculation.appliedDiscount}
+
+                    <div className={styles["price-row"]}>
+                      <span>Гости:</span>
+                      <strong>
+                        {formData.guests} {Number(formData.guests) === 1 ? "гост" : "гости"}
+                      </strong>
+                    </div>
+
+                    {/* 🏷️ Визуализиране на списъка с приложени отстъпки */}
+                    {priceCalculation.discountsList && priceCalculation.discountsList.length > 0 && (
+                      <div style={{ margin: "0.75rem 0", display: "flex", flexDirection: "column", gap: "0.35rem" }}>
+                        {priceCalculation.discountsList.map((disc, idx) => (
+                          <div
+                            key={idx}
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "0.4rem",
+                              color: "#16a34a",
+                              fontSize: "0.85rem",
+                              fontWeight: "500",
+                            }}
+                          >
+                            <Tag size={14} />
+                            <span>
+                              {disc.label} (<strong>-{disc.percent}%</strong>)
+                            </span>
+                          </div>
+                        ))}
                       </div>
                     )}
+
                     <div className={styles["price-total"]}>
                       <span>Обща сума:</span>
                       <strong>{priceCalculation.totalPrice} €</strong>
