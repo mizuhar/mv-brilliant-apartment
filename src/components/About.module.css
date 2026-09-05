@@ -1,6 +1,7 @@
 html {
   scroll-behavior: smooth;
 }
+
 .about-section {
   padding: 5rem 2rem;
   background-color: #f8fafc;
@@ -43,6 +44,9 @@ html {
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
   border: 1px solid #e2e8f0;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
 }
 
 .highlight-card:hover {
@@ -55,11 +59,21 @@ html {
   background-color: #eff6ff;
   width: 56px;
   height: 56px;
-  border-radius: 10px;
+  min-width: 56px;
+  min-height: 56px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   margin-bottom: 1.25rem;
+  flex-shrink: 0;
+}
+
+/* 🎯 Фикс за иконката вътре в контейнера */
+.highlight-icon svg {
+  width: 28px;
+  height: 28px;
+  display: block;
 }
 
 .highlight-card h3 {
@@ -72,17 +86,47 @@ html {
 .highlight-card p {
   color: #64748b;
   font-size: 0.95rem;
+  line-height: 1.5;
+  margin: 0;
 }
+
+/* 📱 Оптимизация за мобилни устройства */
 @media (max-width: 640px) {
   .about-section {
-    padding: 3rem 1rem;
+    padding: 3rem 1.25rem;
+  }
+
+  .about-header {
+    margin-bottom: 2rem;
   }
 
   .about-header h2 {
     font-size: 1.75rem;
   }
 
+  .about-header p {
+    font-size: 1rem;
+  }
+
   .highlights-grid {
     grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+
+  .highlight-card {
+    padding: 1.5rem;
+  }
+
+  .highlight-icon {
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
+    min-height: 48px;
+    margin-bottom: 1rem;
+  }
+
+  .highlight-icon svg {
+    width: 24px;
+    height: 24px;
   }
 }

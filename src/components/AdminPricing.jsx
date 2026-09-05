@@ -422,62 +422,40 @@ export default function AdminPricing() {
         </div>
 
         {/* Списък с активните сезони */}
-        {seasons.length > 0 && (
-          <div style={{ marginBottom: "2rem" }}>
-            <table
-              style={{
-                width: "100%",
-                borderCollapse: "collapse",
-                fontSize: "0.9rem",
-              }}
-            >
-              <thead>
-                <tr
-                  style={{
-                    borderBottom: "2px solid #e2e8f0",
-                    textAlign: "left",
-                  }}
-                >
-                  <th style={{ padding: "0.5rem" }}>Сезон</th>
-                  <th style={{ padding: "0.5rem" }}>Период</th>
-                  <th style={{ padding: "0.5rem" }}>Цена / нощ</th>
-                  <th style={{ padding: "0.5rem" }}>Мин. престой</th>
-                  <th style={{ padding: "0.5rem", textAlign: "right" }}>
-                    Действие
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {seasons.map((s) => (
-                  <tr key={s.id} style={{ borderBottom: "1px solid #f1f5f9" }}>
-                    <td style={{ padding: "0.5rem", fontWeight: "bold" }}>
-                      {s.name}
-                    </td>
-                    <td style={{ padding: "0.5rem" }}>
-                      {s.startDate} — {s.endDate}
-                    </td>
-                    <td style={{ padding: "0.5rem" }}>{s.price} €</td>
-                    <td style={{ padding: "0.5rem" }}>{s.minNights} нощувки</td>
-                    <td style={{ padding: "0.5rem", textAlign: "right" }}>
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveSeason(s.id)}
-                        style={{
-                          background: "none",
-                          border: "none",
-                          color: "#ef4444",
-                          cursor: "pointer",
-                        }}
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+      {seasons.length > 0 && (
+  <div className={styles['table-wrapper']}>
+    <table className={styles['seasons-table']}>
+      <thead>
+        <tr>
+          <th>Сезон</th>
+          <th>Период</th>
+          <th>Цена / нощ</th>
+          <th>Мин. престой</th>
+          <th style={{ textAlign: 'right' }}>Действие</th>
+        </tr>
+      </thead>
+      <tbody>
+        {seasons.map((s) => (
+          <tr key={s.id}>
+            <td style={{ fontWeight: 'bold' }}>{s.name}</td>
+            <td>{s.startDate} — {s.endDate}</td>
+            <td>{s.price} €</td>
+            <td>{s.minNights} нощувки</td>
+            <td style={{ textAlign: 'right' }}>
+              <button
+                type="button"
+                onClick={() => handleRemoveSeason(s.id)}
+                style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer' }}
+              >
+                <Trash2 size={16} />
+              </button>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+)}
 
         <button type="submit" className={styles["btn-save"]} disabled={saving}>
           {saving ? (

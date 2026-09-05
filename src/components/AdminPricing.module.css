@@ -1,11 +1,13 @@
 .pricing-card {
-  background: #e4d0d0;
+  background: #ffffff; /* Сменено от розов цвят към чисто бяло за по-добра четимост */
   border: 1px solid #e2e8f0;
   border-radius: 12px;
   padding: 1.5rem;
   max-width: 700px;
   margin: 1rem 0;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  box-sizing: border-box;
+  width: 100%;
 }
 
 .pricing-header {
@@ -28,7 +30,7 @@
 
 .form-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 1.25rem;
   margin-bottom: 1.5rem;
 }
@@ -45,6 +47,25 @@
   color: #334155;
 }
 
+.form-group input[type="text"],
+.form-group input[type="date"],
+.form-group input[type="number"] {
+  width: 100%;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #ffffff;
+  font-size: 0.95rem;
+  color: #0f172a;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.form-group input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+}
+
 .input-prefix {
   display: flex;
   align-items: center;
@@ -52,6 +73,8 @@
   border-radius: 8px;
   overflow: hidden;
   background: #f8fafc;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .input-prefix input {
@@ -86,6 +109,8 @@
   border: none;
   cursor: pointer;
   transition: background-color 0.2s;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .btn-save:hover {
@@ -95,6 +120,34 @@
 .btn-save:disabled {
   background-color: #94a3b8;
   cursor: not-allowed;
+}
+
+/* 📱 Контейнер за мобилно скролиране на таблицата */
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-bottom: 1.5rem;
+}
+
+.seasons-table {
+  width: 100%;
+  min-width: 500px; /* Гарантира, че колоните няма да се притиснат */
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.seasons-table th,
+.seasons-table td {
+  padding: 0.75rem 0.5rem;
+  text-align: left;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.seasons-table th {
+  font-weight: 600;
+  color: #475569;
+  background-color: #f8fafc;
 }
 
 .alert-success {
@@ -118,4 +171,22 @@
   border-radius: 8px;
   font-size: 0.9rem;
   margin-bottom: 1rem;
+}
+
+/* 📱 Оптимизация за мобилни телефони (под 640px) */
+@media (max-width: 640px) {
+  .pricing-card {
+    padding: 1rem;
+    border-radius: 8px;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr; /* Полетата стават едно под друго */
+    gap: 1rem;
+  }
+
+  .btn-save {
+    padding: 0.85rem 1rem;
+    font-size: 0.95rem;
+  }
 }
