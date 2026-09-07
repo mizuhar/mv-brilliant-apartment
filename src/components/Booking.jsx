@@ -10,6 +10,7 @@ import {
   Loader2,
   Tag,
   ShieldCheck,
+  Info,
 } from "lucide-react";
 import { db } from "../firebase.js";
 import {
@@ -29,7 +30,7 @@ export default function Booking() {
     checkIn: "",
     checkOut: "",
     guests: "2",
-    rateType: "standard", // 'standard' или 'nonRefundable'
+    rateType: "standard",
     message: "",
   });
 
@@ -37,20 +38,18 @@ export default function Booking() {
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
 
-  // ⚙️ Динамичен state за ценообразуването и сезоните от Firestore
   const [pricingConfig, setPricingConfig] = useState({
     basePrice: 100,
     extraGuestPercent: 0.15,
     nonRefundableDiscount: 0.1,
     weeklyDiscount: 0.1,
     monthlyDiscount: 0.25,
-    lastMinuteDiscount: 0.1, // 👈 Добавено
-    earlyBirdDiscount: 0.1,  // 👈 Добавено
+    lastMinuteDiscount: 0.1,
+    earlyBirdDiscount: 0.1,
     minNights: 2,
     seasons: [],
   });
 
-  // 📥 Дърпане на цените и сезоните от Firestore при зареждане
   useEffect(() => {
     const fetchPricing = async () => {
       try {
@@ -65,8 +64,8 @@ export default function Booking() {
             nonRefundableDiscount: Number(data.nonRefundableDiscount) ?? 0.1,
             weeklyDiscount: Number(data.weeklyDiscount) ?? 0.1,
             monthlyDiscount: Number(data.monthlyDiscount) ?? 0.25,
-            lastMinuteDiscount: Number(data.lastMinuteDiscount) ?? 0.1, // 👈 Прочитаме от DB с fallback 10%
-            earlyBirdDiscount: Number(data.earlyBirdDiscount) ?? 0.1,   // 👈 Прочитаме от DB с fallback 10%
+            lastMinuteDiscount: Number(data.lastMinuteDiscount) ?? 0.1,
+            earlyBirdDiscount: Number(data.earlyBirdDiscount) ?? 0.1,
             minNights: Number(data.minNights) || 2,
             seasons: Array.isArray(data.seasons) ? data.seasons : [],
           });
@@ -83,7 +82,6 @@ export default function Booking() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // 📊 Защитено useMemo с гарантирани fallbacks за Last-Minute & Early-Bird
   const priceCalculation = useMemo(() => {
     if (!formData.checkIn || !formData.checkOut) return null;
 
@@ -117,7 +115,6 @@ export default function Booking() {
     const currentDate = new Date(start.getTime());
     const seasonsList = Array.isArray(pricingConfig?.seasons) ? pricingConfig.seasons : [];
 
-    // 1. Обхождане ден по ден
     for (let i = 0; i < nights; i++) {
       const dateString = formatDateLocal(currentDate);
 
@@ -148,7 +145,6 @@ export default function Booking() {
     let total = rawTotal;
     const discountsList = [];
 
-    // 2. Отстъпки за престой
     const monthlyDisc = Number(pricingConfig?.monthlyDiscount) ?? 0.25;
     const weeklyDisc = Number(pricingConfig?.weeklyDiscount) ?? 0.10;
 
@@ -166,7 +162,6 @@ export default function Booking() {
       });
     }
 
-    // 3. Last-Minute / Early-Bird (с твърд fallback 0.10, ако липсва в DB)
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -194,7 +189,6 @@ export default function Booking() {
       });
     }
 
-    // 4. Невъзвръщаема тарифа
     const nonRefundableDisc = Number(pricingConfig?.nonRefundableDiscount) ?? 0.1;
 
     if (formData.rateType === "nonRefundable" && nonRefundableDisc > 0) {
@@ -359,6 +353,35 @@ export default function Booking() {
               </div>
             ) : (
               <form onSubmit={handleSubmit} className={styles["booking-form"]}>
+                {/* 🏷️ ВИЗУАЛИЗИРАНЕ НА БАЗОВАТА ЦЕНА ПРЕДИ ИЗБОР НА ДАТИ */}
+                <div style={{
+                  backgroundColor: "#f8fafc",
+                  border: "1px solid #e2e8f0",
+                  borderRadius: "12px",
+                  padding: "1rem",
+                  marginBottom: "1.25rem",
+                  textAlign: "center"
+                }}>
+                  <div style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "0.5rem",
+                    fontSize: "0.95rem",
+                    color: "#334155"
+                  }}>
+                    <Tag size={18} color="#2563eb" />
+                    <span>Базова цена от:</span>
+                    <strong style={{ fontSize: "1.35rem", color: "#2563eb", fontWeight: "700" }}>
+                      {pricingConfig.basePrice} €
+                    </strong>
+                    <span style={{ fontSize: "0.85rem", color: "#64748b" }}>/ нощувка</span>
+                  </div>
+                  <p style={{ fontSize: "0.8rem", color: "#64748b", marginTop: "0.3rem", marginBottom: 0 }}>
+                    * Цената е за до 2 гости. Изберете дати за изчисляване на крайната сума и отстъпки.
+                  </p>
+                </div>
+
                 {error && (
                   <div
                     style={{
@@ -555,7 +578,6 @@ export default function Booking() {
                   </div>
                 </div>
 
-                {/* 💶 Подробен блок за цената и отстъпките в UI */}
                 {priceCalculation && !priceCalculation.error && (
                   <div className={styles["price-summary"]}>
                     <div className={styles["price-row"]}>
@@ -570,7 +592,6 @@ export default function Booking() {
                       </strong>
                     </div>
 
-                    {/* 🏷️ Визуализиране на списъка с приложени отстъпки */}
                     {priceCalculation.discountsList && priceCalculation.discountsList.length > 0 && (
                       <div style={{ margin: "0.75rem 0", display: "flex", flexDirection: "column", gap: "0.35rem" }}>
                         {priceCalculation.discountsList.map((disc, idx) => (
