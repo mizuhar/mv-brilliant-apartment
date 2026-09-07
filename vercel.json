@@ -1,6 +1,10 @@
 {
   "rewrites": [
     {
+      "source": "/api-booking/(.*)",
+      "destination": "https://ical.booking.com/$1"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
