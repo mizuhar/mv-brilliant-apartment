@@ -10,8 +10,8 @@ export async function syncBookingCalendar() {
   }
 
   try {
-    // Използваме CORS прокси вместо локален /api-booking път
-    const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(rawUrl)}`;
+    // Използваме нашата собствена Vercel сървърна функция за заобикаляне на CORS
+    const proxyUrl = `/api/fetch-ical?url=${encodeURIComponent(rawUrl)}`;
     const response = await fetch(proxyUrl);
 
     if (!response.ok) {
