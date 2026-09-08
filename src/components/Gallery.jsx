@@ -1,58 +1,19 @@
 import { useState } from "react";
+import Lightbox from "yet-another-react-lightbox";
+import "yet-another-react-lightbox/styles.css";
+import { galleryCategories } from "../data/galleryData";
 import styles from "./Gallery.module.css";
 
 export default function Gallery() {
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const [index, setIndex] = useState(-1);
 
-  const photos = [
-    {
-      id: 1,
-      category: "living-room",
-      title: "Всекидневна",
-      alt: "Просторна всекидневна с мека мебел в MV Brilliant Apartment Варна Чаталджа",
-      url: "/images/chataldja-apartment-living-room.jpg",
-    },
-    {
-      id: 2,
-      category: "bedroom",
-      title: "Основна спалня",
-      alt: "Уютна спалня с двойно легло в апартамент под наем Варна",
-      url: "/images/mv-brilliant-bedroom.jpg",
-    },
-    {
-      id: 3,
-      category: "kitchen",
-      title: "Кухненски бокс",
-      alt: "Модерно оборудвана кухня с уреди в MV Brilliant Apartment",
-      url: "/images/mv-brilliant-kitchen6.jpg",
-    },
-    {
-      id: 4,
-      category: "bathroom",
-      title: "Баня и тоалетна",
-      alt: "Чиста и модерна баня в апартамент за нощувки Варна",
-      url: "/images/mv-brilliant-bathroom5.jpg",
-    },
-    {
-      id: 5,
-      category: "living-room",
-      title: "Зона за релакс",
-      alt: "Кът за почивка с телевизор в MV Brilliant Apartment Чаталджа",
-      url: "/images/mv-brilliant-livingroom2.jpg",
-    },
-    {
-      id: 6,
-      category: "balcony",
-      title: "Антре",
-      alt: "Слънчева тераса на апартамент под наем район Чаталджа Варна",
-      url: "/images/mv-brilliant-corridor.jpg",
-    },
-  ];
+  // Намираме текущо избраната категория от galleryCategories
+  const currentCategoryObj =
+    galleryCategories.find((cat) => cat.id === selectedCategory) ||
+    galleryCategories[0];
 
-  const filteredPhotos =
-    selectedCategory === "all"
-      ? photos
-      : photos.filter((p) => p.category === selectedCategory);
+  const currentImages = currentCategoryObj.images;
 
   return (
     <section id="gallery" className={styles["gallery-section"]}>
@@ -62,43 +23,48 @@ export default function Gallery() {
           <p>Разгледайте уюта и модерния интериор на MV Brilliant Apartment</p>
         </div>
 
+        {/* Динамични бутони според категориите в galleryData.js */}
         <div className={styles["filter-buttons"]}>
-          <button
-            className={`${styles["filter-btn"]} ${selectedCategory === "all" ? styles.active : ""}`}
-            onClick={() => setSelectedCategory("all")}
-          >
-            Всички
-          </button>
-          <button
-            className={`${styles["filter-btn"]} ${selectedCategory === "living-room" ? styles.active : ""}`}
-            onClick={() => setSelectedCategory("living-room")}
-          >
-            Всекидневна
-          </button>
-          <button
-            className={`${styles["filter-btn"]} ${selectedCategory === "bedroom" ? styles.active : ""}`}
-            onClick={() => setSelectedCategory("bedroom")}
-          >
-            Спалня
-          </button>
-          <button
-            className={`${styles["filter-btn"]} ${selectedCategory === "kitchen" ? styles.active : ""}`}
-            onClick={() => setSelectedCategory("kitchen")}
-          >
-            Кухня
-          </button>
+          {galleryCategories.map((cat) => (
+            <button
+              key={cat.id}
+              className={`${styles["filter-btn"]} ${
+                selectedCategory === cat.id ? styles.active : ""
+              }`}
+              onClick={() => setSelectedCategory(cat.id)}
+            >
+              {cat.title}
+            </button>
+          ))}
         </div>
 
+        {/* Мрежа от снимки */}
         <div className={styles["gallery-grid"]}>
-          {filteredPhotos.map((photo) => (
-            <div key={photo.id} className={styles["gallery-card"]}>
-              <img src={photo.url} alt={photo.alt} loading="lazy" />
+          {currentImages.map((photo, idx) => (
+            <div
+              key={idx}
+              className={styles["gallery-card"]}
+              style={{ cursor: "pointer" }}
+              onClick={() => setIndex(idx)}
+            >
+              <img src={photo.src} alt={photo.title} loading="lazy" />
               <div className={styles.overlay}>
                 <span>{photo.title}</span>
               </div>
             </div>
           ))}
         </div>
+
+        {/* Lightbox за преглед на цял екран */}
+        <Lightbox
+          open={index >= 0}
+          index={index}
+          close={() => setIndex(-1)}
+          slides={currentImages.map((img) => ({
+            src: img.src,
+            title: img.title,
+          }))}
+        />
       </div>
     </section>
   );
