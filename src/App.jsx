@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth } from "./firebase"; // Провери дали пътят до твоя firebase.js е правилен
+import { Analytics } from '@vercel/analytics/react';
 
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
@@ -148,6 +149,7 @@ function App() {
       <Calendar />
       <Booking />
       <Footer />
+      <Analytics />
     </div>
   );
 }
