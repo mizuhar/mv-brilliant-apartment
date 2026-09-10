@@ -1,19 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
-  <!-- Луксозен тъмносин фон със заоблени ъгли -->
-  <rect width="512" height="512" rx="112" fill="#0f172a"/>
-  
-  <!-- Фина златиста вътрешна рамка -->
-  <rect x="24" y="24" width="464" height="464" rx="88" fill="none" stroke="#f59e0b" stroke-width="6" stroke-opacity="0.3"/>
-  
-  <!-- Монограм M & V -->
-  <g stroke="#f59e0b" stroke-width="26" stroke-linecap="round" stroke-linejoin="round" fill="none">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%"><metadata><rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:dc="http://purl.org/dc/elements/1.1/"><rdf:Description><dc:creator>RealFaviconGenerator</dc:creator><dc:source>https://realfavicongenerator.net</dc:source></rdf:Description></rdf:RDF></metadata><rect width="512" height="512" rx="112" fill="#0f172a"></rect><rect x="24" y="24" width="464" height="464" rx="88" fill="none" stroke="#f59e0b" stroke-width="6" stroke-opacity="0.3"></rect><g stroke="#f59e0b" stroke-width="26" stroke-linecap="round" stroke-linejoin="round" fill="none">
     <!-- Буква M -->
-    <path d="M 110 350 L 110 180 L 190 310 L 270 180 L 270 350" />
+    <path d="M 110 350 L 110 180 L 190 310 L 270 180 L 270 350"></path>
     <!-- Буква V (преплетена) -->
-    <path d="M 270 180 L 335 350 L 402 180" stroke="#fbbf24" />
-  </g>
-  
-  <!-- Диамантен блясък (Brilliant символ) -->
-  <path d="M 390 120 L 402 142 L 424 154 L 402 166 L 390 188 L 378 166 L 356 154 L 378 142 Z" fill="#fbbf24"/>
-  <circle cx="390" cy="154" r="4" fill="#ffffff"/>
-</svg>
+    <path d="M 270 180 L 335 350 L 402 180" stroke="#fbbf24"></path>
+  </g><path d="M 390 120 L 402 142 L 424 154 L 402 166 L 390 188 L 378 166 L 356 154 L 378 142 Z" fill="#fbbf24"></path><circle cx="390" cy="154" r="4" fill="#ffffff"></circle></svg>
