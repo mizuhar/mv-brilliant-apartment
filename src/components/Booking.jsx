@@ -402,7 +402,7 @@ export default function Booking() {
                       }}
                     >
                       <Tag size={18} color="#2563eb" />
-                      <span>Базова цена от:</span>
+                      <span>Базова цена:</span>
                     </div>
 
                     <div
