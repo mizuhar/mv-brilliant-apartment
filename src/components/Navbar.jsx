@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { Sparkles, Phone } from "lucide-react";
+import LanguageSwitcher from "./LanguageSwitcher";
 import styles from "./Navbar.module.css";
 
 export default function Navbar() {
@@ -25,7 +26,8 @@ export default function Navbar() {
           <a href="#location">Локация</a>
         </nav>
 
-        <a href="tel:+359888000000" className={styles["btn-contact"]}>
+          <LanguageSwitcher />
+        <a href="tel:+359899990291" className={styles["btn-contact"]}>
           <Phone size={18} />
           <span>Контакт</span>
         </a>

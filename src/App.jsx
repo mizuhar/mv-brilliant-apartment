@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, createContext, useContext } from "react";
 import { onAuthStateChanged, signOut } from "firebase/auth";
-import { auth } from "./firebase"; // Провери дали пътят до твоя firebase.js е правилен
-import { Analytics } from '@vercel/analytics/react';
+import { auth } from "./firebase";
+import { Analytics } from "@vercel/analytics/react";
 
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
@@ -16,10 +16,16 @@ import AdminCalendar from "./components/AdminCalendar";
 import AdminLogin from "./components/AdminLogin";
 import Footer from "./components/Footer";
 
+// Context за управление на езика в цялото приложение
+export const LanguageContext = createContext();
+
+export const useLanguage = () => useContext(LanguageContext);
+
 function App() {
   const [isAdmin, setIsAdmin] = useState(window.location.hash === "#admin");
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [lang, setLang] = useState("bg"); // Поддържа "bg", "en", "de"
 
   // Следим за промяна в хеша (#admin)
   useEffect(() => {
@@ -84,7 +90,7 @@ function App() {
       );
     }
 
-    // Ако е логнат, показваме админ панела с Header и бутон за Изход
+    // Ако е логнат, показваме админ панела
     return (
       <div
         className="app"
@@ -93,7 +99,7 @@ function App() {
         <div
           style={{
             display: "flex",
-            justify: "space-between",
+            justifyContent: "space-between",
             alignItems: "center",
             marginBottom: "2rem",
             paddingBottom: "1rem",
@@ -132,25 +138,27 @@ function App() {
         </div>
 
         <AdminPricing />
-        <AdminCalendar/>
+        <AdminCalendar />
       </div>
     );
   }
 
-  // Публичен изглед на сайта
+  // Публичен изглед на сайта с Language Provider
   return (
-    <div className="app">
-      <Navbar />
-      <Hero />
-      <About />
-      <Gallery />
-      <Amenities />
-      <Location />
-      <Calendar />
-      <Booking />
-      <Footer />
-      <Analytics />
-    </div>
+    <LanguageContext.Provider value={{ lang, setLang }}>
+      <div className="app">
+        <Navbar />
+        <Hero />
+        <About />
+        <Gallery />
+        <Amenities />
+        <Location />
+        <Calendar />
+        <Booking />
+        <Footer />
+        <Analytics />
+      </div>
+    </LanguageContext.Provider>
   );
 }
 
