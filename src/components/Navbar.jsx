@@ -25,12 +25,13 @@ export default function Navbar() {
           </a>
           <a href="#location">Локация</a>
         </nav>
-
+<div className={styles['nav-actions']}>
           <LanguageSwitcher />
         <a href="tel:+359899990291" className={styles["btn-contact"]}>
           <Phone size={18} />
           <span>Контакт</span>
         </a>
+        </div>
       </div>
     </header>
   );
