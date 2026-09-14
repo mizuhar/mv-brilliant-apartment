@@ -19,18 +19,21 @@ export default function Gallery() {
       categories: {
         all: "Всички",
         living: "Всекидневна",
+        "living-room": "Всекидневна",
         vsekidnevna: "Всекидневна",
         bedroom: "Спалня",
         kitchen: "Кухня",
         bathroom: "Баня",
         corridor: "Коридор",
         entrance: "Вход",
+        Entrance: "Вход",
         vhod: "Вход",
         balcony: "Балкон",
         Всекидневна: "Всекидневна",
         Вход: "Вход",
       },
       photoTitles: {
+        // Кратки наименования
         Всекидневна: "Всекидневна",
         Спалня: "Спалня",
         Кухня: "Кухня",
@@ -38,6 +41,12 @@ export default function Gallery() {
         Коридор: "Коридор",
         Вход: "Вход",
         Балкон: "Балкон",
+        Удобства: "Удобства",
+        // Разширени заглавия от под-галериите
+        "Просторен дневен тракт": "Просторен дневен тракт",
+        "Уютна спалня": "Уютна спалня",
+        "Оборудвана кухня": "Оборудвана кухня",
+        "Модерна баня": "Модерна баня",
       },
     },
     en: {
@@ -47,18 +56,21 @@ export default function Gallery() {
       categories: {
         all: "All",
         living: "Living Room",
+        "living-room": "Living Room",
         vsekidnevna: "Living Room",
         bedroom: "Bedroom",
         kitchen: "Kitchen",
         bathroom: "Bathroom",
         corridor: "Hallway",
         entrance: "Entrance",
+        Entrance: "Entrance",
         vhod: "Entrance",
         balcony: "Balcony",
         Всекидневна: "Living Room",
         Вход: "Entrance",
       },
       photoTitles: {
+        // Кратки наименования
         Всекидневна: "Living Room",
         Спалня: "Bedroom",
         Кухня: "Kitchen",
@@ -66,6 +78,12 @@ export default function Gallery() {
         Коридор: "Hallway",
         Вход: "Entrance",
         Балкон: "Balcony",
+        Удобства: "Amenities",
+        // Разширени заглавия от под-галериите
+        "Просторен дневен тракт": "Spacious Living Area",
+        "Уютна спалня": "Cozy Bedroom",
+        "Оборудвана кухня": "Fully Equipped Kitchen",
+        "Модерна баня": "Modern Bathroom",
       },
     },
     de: {
@@ -75,18 +93,21 @@ export default function Gallery() {
       categories: {
         all: "Alle",
         living: "Wohnzimmer",
+        "living-room": "Wohnzimmer",
         vsekidnevna: "Wohnzimmer",
         bedroom: "Schlafzimmer",
         kitchen: "Küche",
         bathroom: "Badezimmer",
         corridor: "Flur",
         entrance: "Eingang",
+        Entrance: "Eingang",
         vhod: "Eingang",
         balcony: "Balkon",
         Всекидневна: "Wohnzimmer",
         Вход: "Eingang",
       },
       photoTitles: {
+        // Кратки наименования
         Всекидневна: "Wohnzimmer",
         Спалня: "Schlafzimmer",
         Кухня: "Küche",
@@ -94,6 +115,12 @@ export default function Gallery() {
         Коридор: "Flur",
         Вход: "Eingang",
         Балкон: "Balkon",
+        Удобства: "Annehmlichkeiten",
+        // Разширени заглавия от под-галериите
+        "Просторен дневен тракт": "Geräumiger Wohnbereich",
+        "Уютна спалня": "Gemütliches Schlafzimmer",
+        "Оборудвана кухня": "Voll ausgestattete Küche",
+        "Модерна баня": "Modernes Badezimmer",
       },
     },
   };
@@ -164,9 +191,9 @@ export default function Gallery() {
           close={() => setIndex(-1)}
           plugins={[Zoom]}
           zoom={{
-            maxZoomPixelRatio: 3, // Разрешава зуум до 3 пъти
+            maxZoomPixelRatio: 3,
             zoomInMultiplier: 2,
-            doubleTapDelay: 300, // Разпознава двойно почукване на екран
+            doubleTapDelay: 300,
             doubleClickDelay: 300,
             doubleClickMaxStops: 2,
             keyboardMoveDistance: 50,
