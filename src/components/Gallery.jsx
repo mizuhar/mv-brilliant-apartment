@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Lightbox from "yet-another-react-lightbox";
+import Zoom from "yet-another-react-lightbox/plugins/zoom";
 import "yet-another-react-lightbox/styles.css";
 import { galleryCategories } from "../data/galleryData";
 import { useLanguage } from "../App.jsx";
@@ -13,7 +14,8 @@ export default function Gallery() {
   const translations = {
     bg: {
       title: "Галерия",
-      subtitle: "Разгледайте уюта и модерния интериор на MV Brilliant Apartment",
+      subtitle:
+        "Разгледайте уюта и модерния интериор на MV Brilliant Apartment",
       categories: {
         all: "Всички",
         living: "Всекидневна",
@@ -25,22 +27,23 @@ export default function Gallery() {
         entrance: "Вход",
         vhod: "Вход",
         balcony: "Балкон",
-        "Всекидневна": "Всекидневна",
-        "Вход": "Вход",
+        Всекидневна: "Всекидневна",
+        Вход: "Вход",
       },
       photoTitles: {
-        "Всекидневна": "Всекидневна",
-        "Спалня": "Спалня",
-        "Кухня": "Кухня",
-        "Баня": "Баня",
-        "Коридор": "Коридор",
-        "Вход": "Вход",
-        "Балкон": "Балкон",
-      }
+        Всекидневна: "Всекидневна",
+        Спалня: "Спалня",
+        Кухня: "Кухня",
+        Баня: "Баня",
+        Коридор: "Коридор",
+        Вход: "Вход",
+        Балкон: "Балкон",
+      },
     },
     en: {
       title: "Gallery",
-      subtitle: "Explore the comfort and modern interior of MV Brilliant Apartment",
+      subtitle:
+        "Explore the comfort and modern interior of MV Brilliant Apartment",
       categories: {
         all: "All",
         living: "Living Room",
@@ -52,22 +55,23 @@ export default function Gallery() {
         entrance: "Entrance",
         vhod: "Entrance",
         balcony: "Balcony",
-        "Всекидневна": "Living Room",
-        "Вход": "Entrance",
+        Всекидневна: "Living Room",
+        Вход: "Entrance",
       },
       photoTitles: {
-        "Всекидневна": "Living Room",
-        "Спалня": "Bedroom",
-        "Кухня": "Kitchen",
-        "Баня": "Bathroom",
-        "Коридор": "Hallway",
-        "Вход": "Entrance",
-        "Балкон": "Balcony",
-      }
+        Всекидневна: "Living Room",
+        Спалня: "Bedroom",
+        Кухня: "Kitchen",
+        Баня: "Bathroom",
+        Коридор: "Hallway",
+        Вход: "Entrance",
+        Балкон: "Balcony",
+      },
     },
     de: {
       title: "Galerie",
-      subtitle: "Entdecken Sie den Komfort und das moderne Interieur des MV Brilliant Apartment",
+      subtitle:
+        "Entdecken Sie den Komfort und das moderne Interieur des MV Brilliant Apartment",
       categories: {
         all: "Alle",
         living: "Wohnzimmer",
@@ -79,18 +83,18 @@ export default function Gallery() {
         entrance: "Eingang",
         vhod: "Eingang",
         balcony: "Balkon",
-        "Всекидневна": "Wohnzimmer",
-        "Вход": "Eingang",
+        Всекидневна: "Wohnzimmer",
+        Вход: "Eingang",
       },
       photoTitles: {
-        "Всекидневна": "Wohnzimmer",
-        "Спалня": "Schlafzimmer",
-        "Кухня": "Küche",
-        "Баня": "Badezimmer",
-        "Коридор": "Flur",
-        "Вход": "Eingang",
-        "Балкон": "Balkon",
-      }
+        Всекидневна: "Wohnzimmer",
+        Спалня: "Schlafzimmer",
+        Кухня: "Küche",
+        Баня: "Badezimmer",
+        Коридор: "Flur",
+        Вход: "Eingang",
+        Балкон: "Balkon",
+      },
     },
   };
 
@@ -158,6 +162,15 @@ export default function Gallery() {
           open={index >= 0}
           index={index}
           close={() => setIndex(-1)}
+          plugins={[Zoom]}
+          zoom={{
+            maxZoomPixelRatio: 3, // Разрешава зуум до 3 пъти
+            zoomInMultiplier: 2,
+            doubleTapDelay: 300, // Разпознава двойно почукване на екран
+            doubleClickDelay: 300,
+            doubleClickMaxStops: 2,
+            keyboardMoveDistance: 50,
+          }}
           slides={currentImages.map((img) => ({
             src: img.src,
             title: getTranslatedTitle(img.title),
