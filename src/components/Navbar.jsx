@@ -1,9 +1,44 @@
 import { Link } from "react-router-dom";
 import { Sparkles, Phone } from "lucide-react";
 import LanguageSwitcher from "./LanguageSwitcher";
+import { useLanguage } from "../App.jsx";
 import styles from "./Navbar.module.css";
 
 export default function Navbar() {
+  const { lang } = useLanguage();
+
+  const translations = {
+    bg: {
+      about: "За апартамента",
+      gallery: "Галерия",
+      amenities: "Удобства",
+      booking: "Резервация",
+      calendar: "Календар",
+      location: "Локация",
+      contact: "Контакт",
+    },
+    en: {
+      about: "About",
+      gallery: "Gallery",
+      amenities: "Amenities",
+      booking: "Booking",
+      calendar: "Calendar",
+      location: "Location",
+      contact: "Contact",
+    },
+    de: {
+      about: "Über uns",
+      gallery: "Galerie",
+      amenities: "Ausstattung",
+      booking: "Buchung",
+      calendar: "Kalender",
+      location: "Lage",
+      contact: "Kontakt",
+    },
+  };
+
+  const t = translations[lang] || translations.bg;
+
   return (
     <header className={styles.navbar}>
       <div className={styles["navbar-container"]}>
@@ -13,24 +48,25 @@ export default function Navbar() {
         </Link>
 
         <nav className={styles["nav-links"]}>
-          <a href="#about">За апартамента</a>
-          <a href="#gallery">Галерия</a>
-          <a href="#amenities">Удобства</a>
-          <a href="#booking">Резервация</a>
+          <a href="#about">{t.about}</a>
+          <a href="#gallery">{t.gallery}</a>
+          <a href="#amenities">{t.amenities}</a>
+          <a href="#booking">{t.booking}</a>
           <a
             href="#calendar"
             className="text-gray-700 hover:text-blue-600 transition-colors"
           >
-            Календар
+            {t.calendar}
           </a>
-          <a href="#location">Локация</a>
+          <a href="#location">{t.location}</a>
         </nav>
-<div className={styles['nav-actions']}>
+
+        <div className={styles["nav-actions"]}>
           <LanguageSwitcher />
-        <a href="tel:+359899990291" className={styles["btn-contact"]}>
-          <Phone size={18} />
-          <span>Контакт</span>
-        </a>
+          <a href="tel:+359899990291" className={styles["btn-contact"]}>
+            <Phone size={18} />
+            <span>{t.contact}</span>
+          </a>
         </div>
       </div>
     </header>

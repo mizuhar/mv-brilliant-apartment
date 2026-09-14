@@ -10,7 +10,6 @@ import {
   Loader2,
   Tag,
   ShieldCheck,
-  Info,
 } from "lucide-react";
 import { db } from "../firebase.js";
 import {
@@ -20,9 +19,164 @@ import {
   doc,
   getDoc,
 } from "firebase/firestore";
+import { useLanguage } from "../App.jsx";
 import styles from "./Booking.module.css";
 
 export default function Booking() {
+  const { lang } = useLanguage();
+
+  const translations = {
+    bg: {
+      headerTitle: "Резервация & Запитване",
+      headerDesc: "Изпратете запитване за желаните от вас дати и ние ще се свържем с вас възможно най-скоро",
+      directContact: "Директен контакт",
+      contactDesc: "Предпочитате бърз разговор или съобщение? Свържете се с нас директно:",
+      phoneLabel: "Телефон",
+      emailLabel: "Имейл",
+      directBookingNoteTitle: "Директна резервация:",
+      directBookingNoteText: "При резервация през сайта спестявате комисионни такси от платформи за нощувки!",
+      successTitle: "Благодарим ви за запитването!",
+      successDesc: "Ще се свържем с вас в най-кратък срок, за да потвърдим наличността за избраните дати.",
+      newRequestBtn: "Ново запитване",
+      basePriceLabel: "Базова цена:",
+      perNight: "/ нощувка",
+      basePriceNote: "* Цената е за до 2 гости. Изберете дати за изчисляване на крайната сума и отстъпки.",
+      nameLabel: "Вашето име",
+      namePlaceholder: "Иван Иванов",
+      emailInputLabel: "Имейл",
+      phoneInputLabel: "Телефон",
+      checkInLabel: "Настаняване",
+      checkOutLabel: "Напускане",
+      minNightsNote: "Минималният престой за резервация е",
+      nightsWord: "нощувки.",
+      guestsLabel: "Брой гости",
+      guestSingular: "гост",
+      guestPlural: "гости",
+      rateLabel: "Изберете тарифа",
+      standardRate: "Стандартна тарифа",
+      standardRateDesc: "Възможност за безплатна анулация",
+      nonRefundableRate: "Без право на анулация",
+      nonRefundableRateDesc: "Спестявате",
+      nonRefundableRateDescEnd: "% от сумата, без право на възстановяване",
+      summaryStay: "Престой:",
+      summaryNights: "нощувки",
+      summaryGuests: "Гости:",
+      summaryTotal: "Обща сума:",
+      messageLabel: "Допълнителна информация / въпроси",
+      messagePlaceholder: "Например: час на пристигане, нужда от детско креватче...",
+      submitBtn: "Изпрати запитването",
+      sending: "Изпращане...",
+      errDate: "Датата на напускане трябва да е след настаняването.",
+      errMinNights: "Минималният престой за избрания период е {minNights} нощувки.",
+      errGeneric: "Възникна грешка при изпращането. Моля, опитайте отново.",
+      discMonthly: "Месечна отстъпка",
+      discWeekly: "Седмична отстъпка",
+      discLastMinute: "Last-Minute оферта",
+      discEarlyBird: "Early-Bird (Ранно запитване)",
+      discNonRefundable: "Невъзвръщаема тарифа"
+    },
+    en: {
+      headerTitle: "Booking & Inquiry",
+      headerDesc: "Send an inquiry for your preferred dates and we will contact you as soon as possible",
+      directContact: "Direct Contact",
+      contactDesc: "Prefer a quick chat or message? Get in touch with us directly:",
+      phoneLabel: "Phone",
+      emailLabel: "Email",
+      directBookingNoteTitle: "Direct Booking:",
+      directBookingNoteText: "Booking directly through our website saves you third-party commission fees!",
+      successTitle: "Thank you for your inquiry!",
+      successDesc: "We will reach out to you shortly to confirm availability for your selected dates.",
+      newRequestBtn: "New Inquiry",
+      basePriceLabel: "Base price:",
+      perNight: "/ night",
+      basePriceNote: "* Price is for up to 2 guests. Select dates to calculate total cost and discounts.",
+      nameLabel: "Your Name",
+      namePlaceholder: "John Doe",
+      emailInputLabel: "Email",
+      phoneInputLabel: "Phone",
+      checkInLabel: "Check-in",
+      checkOutLabel: "Check-out",
+      minNightsNote: "Minimum stay required is",
+      nightsWord: "nights.",
+      guestsLabel: "Number of guests",
+      guestSingular: "guest",
+      guestPlural: "guests",
+      rateLabel: "Select Rate",
+      standardRate: "Standard Rate",
+      standardRateDesc: "Free cancellation options available",
+      nonRefundableRate: "Non-refundable Rate",
+      nonRefundableRateDesc: "Save",
+      nonRefundableRateDescEnd: "% off total price, non-refundable",
+      summaryStay: "Stay:",
+      summaryNights: "nights",
+      summaryGuests: "Guests:",
+      summaryTotal: "Total Amount:",
+      messageLabel: "Additional Information / Questions",
+      messagePlaceholder: "E.g., estimated arrival time, baby cot request...",
+      submitBtn: "Send Inquiry",
+      sending: "Sending...",
+      errDate: "Check-out date must be after check-in date.",
+      errMinNights: "Minimum stay for the selected period is {minNights} nights.",
+      errGeneric: "An error occurred while sending. Please try again.",
+      discMonthly: "Monthly Discount",
+      discWeekly: "Weekly Discount",
+      discLastMinute: "Last-Minute Offer",
+      discEarlyBird: "Early-Bird Special",
+      discNonRefundable: "Non-refundable Discount"
+    },
+    de: {
+      headerTitle: "Buchung & Anfrage",
+      headerDesc: "Senden Sie eine Anfrage für Ihre Wunschdaten und wir melden uns schnellstmöglich bei Ihnen",
+      directContact: "Direkter Kontakt",
+      contactDesc: "Bevorzugen Sie ein kurzes Gespräch oder eine Nachricht? Kontaktieren Sie uns direkt:",
+      phoneLabel: "Telefon",
+      emailLabel: "E-Mail",
+      directBookingNoteTitle: "Direktbuchung:",
+      directBookingNoteText: "Bei einer Buchung über unsere Website sparen Sie Gebühren von Drittanbietern!",
+      successTitle: "Vielen Dank für Ihre Anfrage!",
+      successDesc: "Wir werden uns Kürze bei Ihnen melden, um die Verfügbarkeit zu bestätigen.",
+      newRequestBtn: "Neue Anfrage",
+      basePriceLabel: "Basispreis:",
+      perNight: "/ Nacht",
+      basePriceNote: "* Der Preis gilt für bis zu 2 Gäste. Wählen Sie Daten für Gesamtsumme & Rabatte.",
+      nameLabel: "Ihr Name",
+      namePlaceholder: "Max Mustermann",
+      emailInputLabel: "E-Mail",
+      phoneInputLabel: "Telefon",
+      checkInLabel: "Anreise",
+      checkOutLabel: "Abreise",
+      minNightsNote: "Der Mindestaufenthalt beträgt",
+      nightsWord: "Nächte.",
+      guestsLabel: "Anzahl der Gäste",
+      guestSingular: "Gast",
+      guestPlural: "Gäste",
+      rateLabel: "Tarif Auswählen",
+      standardRate: "Standardtarif",
+      standardRateDesc: "Kostenlose Stornierungsoption",
+      nonRefundableRate: "Nicht erstattungsfähig",
+      nonRefundableRateDesc: "Sie sparen",
+      nonRefundableRateDescEnd: "% auf den Gesamtpreis, nicht erstattungsfähig",
+      summaryStay: "Aufenthalt:",
+      summaryNights: "Nächte",
+      summaryGuests: "Gäste:",
+      summaryTotal: "Gesamtsumme:",
+      messageLabel: "Zusätzliche Informationen / Fragen",
+      messagePlaceholder: "Z.B. voraussichtliche Ankunftszeit, Babybett erwünscht...",
+      submitBtn: "Anfrage Senden",
+      sending: "Wird gesendet...",
+      errDate: "Das Abreisedatum muss nach dem Anreisedatum liegen.",
+      errMinNights: "Mindestaufenthalt für diesen Zeitraum beträgt {minNights} Nächte.",
+      errGeneric: "Beim Senden ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut.",
+      discMonthly: "Monatsrabatt",
+      discWeekly: "Wochenrabatt",
+      discLastMinute: "Last-Minute Angebot",
+      discEarlyBird: "Frühbucherrabatt",
+      discNonRefundable: "Nicht erstattungsfähiger Rabatt"
+    }
+  };
+
+  const t = translations[lang] || translations.bg;
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -94,7 +248,7 @@ export default function Booking() {
     const nights = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
     if (nights <= 0) {
-      return { error: "Датата на напускане трябва да е след настаняването." };
+      return { error: t.errDate };
     }
 
     const basePrice = Number(pricingConfig?.basePrice) || 100;
@@ -151,7 +305,7 @@ export default function Booking() {
 
     if (nights < maxMinNightsRequired) {
       return {
-        error: `Минималният престой за избрания период е ${maxMinNightsRequired} нощувки.`,
+        error: t.errMinNights.replace("{minNights}", maxMinNightsRequired),
       };
     }
 
@@ -164,13 +318,13 @@ export default function Booking() {
     if (nights >= 28 && monthlyDisc > 0) {
       total *= 1 - monthlyDisc;
       discountsList.push({
-        label: "Месечна отстъпка",
+        label: t.discMonthly,
         percent: Math.round(monthlyDisc * 100),
       });
     } else if (nights >= 7 && weeklyDisc > 0) {
       total *= 1 - weeklyDisc;
       discountsList.push({
-        label: "Седмична отстъпка",
+        label: t.discWeekly,
         percent: Math.round(weeklyDisc * 100),
       });
     }
@@ -179,7 +333,7 @@ export default function Booking() {
     today.setHours(0, 0, 0, 0);
 
     const daysUntilCheckIn = Math.ceil(
-      (start.getTime() - today.getTime()) / (1000 * 60 * 60 * 24),
+      (start.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
     );
 
     const lastMinuteDisc =
@@ -195,13 +349,13 @@ export default function Booking() {
     if (daysUntilCheckIn >= 0 && daysUntilCheckIn <= 3 && lastMinuteDisc > 0) {
       total *= 1 - lastMinuteDisc;
       discountsList.push({
-        label: "Last-Minute оферта",
+        label: t.discLastMinute,
         percent: Math.round(lastMinuteDisc * 100),
       });
     } else if (daysUntilCheckIn >= 60 && earlyBirdDisc > 0) {
       total *= 1 - earlyBirdDisc;
       discountsList.push({
-        label: "Early-Bird (Ранно запитване)",
+        label: t.discEarlyBird,
         percent: Math.round(earlyBirdDisc * 100),
       });
     }
@@ -212,7 +366,7 @@ export default function Booking() {
     if (formData.rateType === "nonRefundable" && nonRefundableDisc > 0) {
       total *= 1 - nonRefundableDisc;
       discountsList.push({
-        label: "Невъзвръщаема тарифа",
+        label: t.discNonRefundable,
         percent: Math.round(nonRefundableDisc * 100),
       });
     }
@@ -230,6 +384,7 @@ export default function Booking() {
     formData.guests,
     formData.rateType,
     pricingConfig,
+    t,
   ]);
 
   const sendTelegramNotification = async (data, calc) => {
@@ -244,7 +399,7 @@ export default function Booking() {
         : "🟢 Стандартна (С право на анулация)";
 
     const message = `
-🔔 *НОВА РЕЗЕРВАЦИЯ / ЗАПИТВАНЕ*
+🔔 *НОВА РЕЗЕРВАЦИЯ / ЗАПИТВАНЕ* [${lang.toUpperCase()}]
 
 👤 *Име:* ${data.name}
 📞 *Телефон:* ${data.phone}
@@ -288,6 +443,7 @@ export default function Booking() {
         ...formData,
         calculatedPrice: priceCalculation ? priceCalculation.totalPrice : null,
         nights: priceCalculation ? priceCalculation.nights : null,
+        language: lang,
         createdAt: serverTimestamp(),
       };
 
@@ -297,7 +453,7 @@ export default function Booking() {
       setSubmitted(true);
     } catch (err) {
       console.error("Error adding document: ", err);
-      setError("Възникна грешка при изпращането. Моля, опитайте отново.");
+      setError(t.errGeneric);
     } finally {
       setLoading(false);
     }
@@ -307,20 +463,14 @@ export default function Booking() {
     <section id="booking" className={styles["booking-section"]}>
       <div className={styles["booking-container"]}>
         <div className={styles["booking-header"]}>
-          <h2>Резервация & Запитване</h2>
-          <p>
-            Изпратете запитване за желаните от вас дати и ние ще се свържем с
-            вас възможно най-скоро
-          </p>
+          <h2>{t.headerTitle}</h2>
+          <p>{t.headerDesc}</p>
         </div>
 
         <div className={styles["booking-grid"]}>
           <div className={styles["booking-info"]}>
-            <h3>Директен контакт</h3>
-            <p>
-              Предпочитате бърз разговор или съобщение? Свържете се с нас
-              директно:
-            </p>
+            <h3>{t.directContact}</h3>
+            <p>{t.contactDesc}</p>
 
             <div className={styles["contact-list"]}>
               <a href="tel:+359899990291" className={styles["contact-item"]}>
@@ -328,7 +478,7 @@ export default function Booking() {
                   <Phone size={20} />
                 </div>
                 <div>
-                  <span>Телефон</span>
+                  <span>{t.phoneLabel}</span>
                   <strong>+359 89 999 0291</strong>
                 </div>
               </a>
@@ -341,15 +491,14 @@ export default function Booking() {
                   <Mail size={20} />
                 </div>
                 <div>
-                  <span>Имейл</span>
+                  <span>{t.emailLabel}</span>
                   <strong>mizuharer2@gmail.com</strong>
                 </div>
               </a>
             </div>
 
             <div className={styles["direct-booking-note"]}>
-              💡 <strong>Директна резервация:</strong> При резервация през сайта
-              спестявате комисионни такси от платформи за нощувки!
+              💡 <strong>{t.directBookingNoteTitle}</strong> {t.directBookingNoteText}
             </div>
           </div>
 
@@ -357,21 +506,17 @@ export default function Booking() {
             {submitted ? (
               <div className={styles["success-message"]}>
                 <CheckCircle size={48} className={styles["success-icon"]} />
-                <h3>Благодарим ви за запитването!</h3>
-                <p>
-                  Ще се свържем с вас в най-кратък срок, за да потвърдим
-                  наличността за избраните дати.
-                </p>
+                <h3>{t.successTitle}</h3>
+                <p>{t.successDesc}</p>
                 <button
                   onClick={() => setSubmitted(false)}
                   className={styles["btn-reset"]}
                 >
-                  Ново запитване
+                  {t.newRequestBtn}
                 </button>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className={styles["booking-form"]}>
-                {/* 🏷️ ВИЗУАЛИЗИРАНЕ НА БАЗОВАТА ЦЕНА ПРЕДИ ИЗБОР НА ДАТИ */}
                 <div
                   style={{
                     backgroundColor: "#f8fafc",
@@ -402,7 +547,7 @@ export default function Booking() {
                       }}
                     >
                       <Tag size={18} color="#2563eb" />
-                      <span>Базова цена:</span>
+                      <span>{t.basePriceLabel}</span>
                     </div>
 
                     <div
@@ -423,7 +568,7 @@ export default function Booking() {
                         {pricingConfig?.basePrice || "..."} €
                       </strong>
                       <span style={{ fontSize: "0.85rem", color: "#64748b" }}>
-                        / нощувка
+                        {t.perNight}
                       </span>
                     </div>
                   </div>
@@ -434,11 +579,9 @@ export default function Booking() {
                       color: "#64748b",
                       marginTop: "0.35rem",
                       marginBottom: 0,
-                      leading: "1.3",
                     }}
                   >
-                    * Цената е за до 2 гости. Изберете дати за изчисляване на
-                    крайната сума и отстъпки.
+                    {t.basePriceNote}
                   </p>
                 </div>
 
@@ -456,14 +599,14 @@ export default function Booking() {
 
                 <div className={styles["form-group"]}>
                   <label htmlFor="name">
-                    <User size={16} /> Вашето име
+                    <User size={16} /> {t.nameLabel}
                   </label>
                   <input
                     type="text"
                     id="name"
                     name="name"
                     required
-                    placeholder="Иван Иванов"
+                    placeholder={t.namePlaceholder}
                     value={formData.name}
                     onChange={handleChange}
                   />
@@ -472,7 +615,7 @@ export default function Booking() {
                 <div className={styles["form-row"]}>
                   <div className={styles["form-group"]}>
                     <label htmlFor="email">
-                      <Mail size={16} /> Имейл
+                      <Mail size={16} /> {t.emailInputLabel}
                     </label>
                     <input
                       type="email"
@@ -487,7 +630,7 @@ export default function Booking() {
 
                   <div className={styles["form-group"]}>
                     <label htmlFor="phone">
-                      <Phone size={16} /> Телефон
+                      <Phone size={16} /> {t.phoneInputLabel}
                     </label>
                     <input
                       type="tel"
@@ -504,7 +647,7 @@ export default function Booking() {
                 <div className={styles["form-row"]}>
                   <div className={styles["form-group"]}>
                     <label htmlFor="checkIn">
-                      <Calendar size={16} /> Настаняване
+                      <Calendar size={16} /> {t.checkInLabel}
                     </label>
                     <input
                       type="date"
@@ -518,7 +661,7 @@ export default function Booking() {
 
                   <div className={styles["form-group"]}>
                     <label htmlFor="checkOut">
-                      <Calendar size={16} /> Напускане
+                      <Calendar size={16} /> {t.checkOutLabel}
                     </label>
                     <input
                       type="date"
@@ -558,15 +701,15 @@ export default function Booking() {
                     marginBottom: "1rem",
                   }}
                 >
-                  ℹ️ *Минималният престой за резервация е{" "}
+                  ℹ️ *{t.minNightsNote}{" "}
                   {priceCalculation?.minNightsRequired ||
                     pricingConfig.minNights}{" "}
-                  нощувки.*
+                  {t.nightsWord}*
                 </div>
 
                 <div className={styles["form-group"]}>
                   <label htmlFor="guests">
-                    <Users size={16} /> Брой гости
+                    <Users size={16} /> {t.guestsLabel}
                   </label>
                   <select
                     id="guests"
@@ -574,18 +717,18 @@ export default function Booking() {
                     value={formData.guests}
                     onChange={handleChange}
                   >
-                    <option value="1">1 гост</option>
-                    <option value="2">2 гости</option>
+                    <option value="1">1 {t.guestSingular}</option>
+                    <option value="2">2 {t.guestPlural}</option>
                     <option value="3">
-                      3 гости (+
+                      3 {t.guestPlural} (+
                       {Math.round(pricingConfig.extraGuestPercent * 100)}%)
                     </option>
                     <option value="4">
-                      4 гости (+
+                      4 {t.guestPlural} (+
                       {Math.round(pricingConfig.extraGuestPercent * 2 * 100)}%)
                     </option>
                     <option value="5">
-                      5 гости (+
+                      5 {t.guestPlural} (+
                       {Math.round(pricingConfig.extraGuestPercent * 3 * 100)}%)
                     </option>
                   </select>
@@ -593,7 +736,7 @@ export default function Booking() {
 
                 <div className={styles["form-group"]}>
                   <label>
-                    <ShieldCheck size={16} /> Изберете тарифа
+                    <ShieldCheck size={16} /> {t.rateLabel}
                   </label>
                   <div className={styles["rate-options"]}>
                     <label className={styles["rate-card"]}>
@@ -605,8 +748,8 @@ export default function Booking() {
                         onChange={handleChange}
                       />
                       <div>
-                        <strong>Стандартна тарифа</strong>
-                        <p>Възможност за безплатна анулация</p>
+                        <strong>{t.standardRate}</strong>
+                        <p>{t.standardRateDesc}</p>
                       </div>
                     </label>
 
@@ -620,18 +763,18 @@ export default function Booking() {
                       />
                       <div>
                         <strong>
-                          Без право на анулация (-
+                          {t.nonRefundableRate} (-
                           {Math.round(
-                            pricingConfig.nonRefundableDiscount * 100,
+                            pricingConfig.nonRefundableDiscount * 100
                           )}
                           %)
                         </strong>
                         <p>
-                          Спестявате{" "}
+                          {t.nonRefundableRateDesc}{" "}
                           {Math.round(
-                            pricingConfig.nonRefundableDiscount * 100,
+                            pricingConfig.nonRefundableDiscount * 100
                           )}
-                          % от сумата, без право на възстановяване
+                          {t.nonRefundableRateDescEnd}
                         </p>
                       </div>
                     </label>
@@ -641,15 +784,19 @@ export default function Booking() {
                 {priceCalculation && !priceCalculation.error && (
                   <div className={styles["price-summary"]}>
                     <div className={styles["price-row"]}>
-                      <span>Престой:</span>
-                      <strong>{priceCalculation.nights} нощувки</strong>
+                      <span>{t.summaryStay}</span>
+                      <strong>
+                        {priceCalculation.nights} {t.summaryNights}
+                      </strong>
                     </div>
 
                     <div className={styles["price-row"]}>
-                      <span>Гости:</span>
+                      <span>{t.summaryGuests}</span>
                       <strong>
                         {formData.guests}{" "}
-                        {Number(formData.guests) === 1 ? "гост" : "гости"}
+                        {Number(formData.guests) === 1
+                          ? t.guestSingular
+                          : t.guestPlural}
                       </strong>
                     </div>
 
@@ -685,21 +832,19 @@ export default function Booking() {
                       )}
 
                     <div className={styles["price-total"]}>
-                      <span>Обща сума:</span>
+                      <span>{t.summaryTotal}</span>
                       <strong>{priceCalculation.totalPrice} €</strong>
                     </div>
                   </div>
                 )}
 
                 <div className={styles["form-group"]}>
-                  <label htmlFor="message">
-                    Допълнителна информация / въпроси
-                  </label>
+                  <label htmlFor="message">{t.messageLabel}</label>
                   <textarea
                     id="message"
                     name="message"
                     rows="3"
-                    placeholder="Например: час на пристигане, нужда от детско креватче..."
+                    placeholder={t.messagePlaceholder}
                     value={formData.message}
                     onChange={handleChange}
                   ></textarea>
@@ -713,12 +858,12 @@ export default function Booking() {
                   {loading ? (
                     <>
                       <Loader2 size={18} className="animate-spin" />
-                      <span>Изпращане...</span>
+                      <span>{t.sending}</span>
                     </>
                   ) : (
                     <>
                       <Send size={18} />
-                      <span>Изпрати запитването</span>
+                      <span>{t.submitBtn}</span>
                     </>
                   )}
                 </button>
